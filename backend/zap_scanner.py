@@ -1,5 +1,5 @@
 """
-zap_scanner.py  —  All ZAP API interactions.
+zap_scanner.py - All ZAP API interactions.
 
 Performance tuning
 ──────────────────
@@ -30,7 +30,7 @@ load_dotenv(BACKEND_DIR / ".env")
 load_dotenv(BACKEND_DIR.parent / ".env")
 
 # ─── ZAP connection settings ──────────────────────────────────────────────────
-ZAP_BASE_URL = "http://127.0.0.1:8080"
+ZAP_BASE_URL = os.getenv("ZAP_BASE_URL", "http://127.0.0.1:8080").rstrip("/")
 ZAP_API_KEY = os.getenv("ZAP_API_KEY")
 
 if not ZAP_API_KEY:
@@ -235,8 +235,8 @@ class ZAPScanner:
         except requests.exceptions.ConnectionError:
             raise RuntimeError(
                 f"Cannot connect to ZAP at {self.base}. "
-                "Start ZAP first:\n"
-                "  zap.sh -daemon -port 8080 -config api.key=changeme"
+                "Start the Dockerized ZAP daemon first:\n"
+                "  docker compose up -d zap"
             )
 
     # ── Speed: configure ZAP options before every scan ────────────────────────
