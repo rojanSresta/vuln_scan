@@ -133,7 +133,7 @@ export default function App() {
   const startScan = async () => {
     setPhase("scanning");
     setProgress(0);
-    setStatusMsg("Connecting to ZAP…");
+    setStatusMsg("Preparing scanner…");
     setResults([]);
     setErrorMsg("");
     setExpandedRows({});
@@ -331,8 +331,8 @@ export default function App() {
               <strong>Scan Failed</strong>
               <p>{errorMsg}</p>
               <p className="error-hint">
-                Ensure ZAP is running:<br />
-                <code>zap.sh -daemon -port 8080 -config api.key=zap_api_key</code>
+                Ensure the backend is running and the target URL is reachable.<br />
+                <code>uvicorn main:app --reload --port 8000</code>
               </p>
             </div>
             <button className="retry-btn" onClick={() => setPhase("idle")}>
@@ -492,7 +492,7 @@ export default function App() {
       </main>
 
       <footer className="app-footer">
-        <span>VulnScan · Final Year Project · Powered by OWASP ZAP</span>
+        <span>VulnScan · Final Year Project · Manual Web Vulnerability Scanner</span>
       </footer>
     </div>
   );

@@ -1,19 +1,17 @@
 """
-OWASP ZAP Vulnerability Scanner - FastAPI Backend
-Connects to a locally running ZAP daemon and orchestrates security scans.
+Manual vulnerability scanner backend built with FastAPI.
 """
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, HttpUrl, validator
-from typing import List, Optional
+from pydantic import BaseModel, validator
+from typing import List
 import uuid
 import os
-import time
 import logging
 
-from zap_scanner import ZAPScanner
+from manual_scanner import ManualVulnerabilityScanner
 from report_generator import generate_pdf_report
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
@@ -23,7 +21,7 @@ logger = logging.getLogger(__name__)
 # ─── App Setup ────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="VulnScan API",
-    description="OWASP ZAP-powered vulnerability scanner backend",
+    description="Manual web vulnerability scanner backend",
     version="1.0.0",
 )
 
@@ -160,127 +158,39 @@ def download_report(scan_id: str):
 
 def run_scan(scan_id: str, target_url: str, vulnerabilities: List[str]):
     """
-    Orchestrates the full ZAP scan pipeline:
-      1. Spider the target
-      2. Configure & run active scan (only selected rules)
-      3. Wait for passive scan queue to drain
-      4. Fetch & filter alerts
+    Runs the manual scan pipeline:
+      1. Crawl the target with BFS
+      2. Execute the selected heuristic vulnerability checks
+      3. Store normalized findings
     """
     job = scan_jobs[scan_id]
 
     try:
-        scanner = ZAPScanner()
-
-        # ── 1. Spider ──────────────────────────────────────────────────────
+        scanner = ManualVulnerabilityScanner()
         job["status"] = "spidering"
-        job["message"] = "Spidering target website…"
-        job["progress"] = 5
-        logger.info(f"[{scan_id}] Spider start → {target_url}")
+        job["message"] = "Preparing scan…"
+        job["progress"] = 2
+        logger.info(f"[{scan_id}] Manual scan start → {target_url}")
 
-        spider_id = scanner.start_spider(target_url)
-        _wait_for_spider(scanner, spider_id, scan_id, job)
+        def on_progress(progress: int, message: str):
+            job["progress"] = progress
+            job["message"] = message
+            job["status"] = "spidering" if progress < 35 else "scanning"
 
-        # ── 2. Active scan ─────────────────────────────────────────────────
-        job["status"] = "scanning"
-        job["message"] = "Configuring scan rules…"
-        job["progress"] = 40
-        logger.info(f"[{scan_id}] Active scan start")
-
-        # Resolve the "scan_all" shortcut
-        effective_vulns = vulnerabilities
-        if "scan_all" in vulnerabilities:
-            effective_vulns = ["sql_injection", "xss", "csrf", "broken_auth", "dir_traversal"]
-
-        ascan_id = scanner.start_active_scan(target_url, effective_vulns)
-
-        job["message"] = "Running active vulnerability scan…"
-        _wait_for_active_scan(scanner, ascan_id, scan_id, job)
-
-        # ── 3. Passive scan drain ──────────────────────────────────────────
-        # ZAP runs passive rules on all collected traffic after the active scan.
-        # Wait for that queue to drain so we capture all findings.
-        job["message"] = "Waiting for passive scan to finish…"
-        job["progress"] = 94
-        scanner.wait_for_passive_scan(timeout=120)
-
-        # ── 4. Alerts ──────────────────────────────────────────────────────
-        job["message"] = "Collecting results…"
-        job["progress"] = 97
-        raw_alerts = scanner.get_alerts(target_url)
-        results = scanner.filter_and_enrich_alerts(raw_alerts, effective_vulns)
+        results = scanner.scan(
+            target_url=target_url,
+            vulnerabilities=vulnerabilities,
+            progress_callback=on_progress,
+        )
 
         job["results"] = results
         job["status"] = "done"
         job["progress"] = 100
         job["message"] = f"Scan complete — {len(results)} finding(s)"
-        logger.info(f"[{scan_id}] Done: {len(results)} alerts")
+        logger.info(f"[{scan_id}] Done: {len(results)} findings")
 
     except Exception as exc:
         logger.exception(f"[{scan_id}] Scan error: {exc}")
         job["status"] = "error"
         job["message"] = f"Scan failed: {str(exc)}"
         job["progress"] = 0
-
-
-def _wait_for_spider(scanner, spider_id, scan_id, job, timeout=90):
-    """
-    Poll spider until done or 90 s timeout.
-    Spider is shallow (maxChildren=5) so 90 s is plenty.
-    Stall detection: if progress freezes for 30 s, move on.
-    """
-    deadline      = time.time() + timeout
-    last_pct      = -1
-    stall_by      = time.time() + 30
-
-    while time.time() < deadline:
-        pct = scanner.spider_progress(spider_id)
-        job["progress"] = 5 + int(pct * 0.30)
-        job["message"]  = f"Spidering… {pct}% complete"
-
-        if pct >= 100:
-            return
-
-        if pct != last_pct:
-            last_pct = pct
-            stall_by = time.time() + 30   # reset stall timer on any movement
-
-        if time.time() > stall_by:
-            logger.warning(f"Spider stalled at {pct}% — moving to active scan.")
-            return
-
-        time.sleep(3)
-
-    logger.warning("Spider timed out — moving on.")
-
-
-def _wait_for_active_scan(scanner, ascan_id, scan_id, job, timeout=600):
-    """
-    Poll active scan until done or 10 min timeout.
-    Because we only enable a handful of rules (not all 200+), 10 min is
-    more than enough for most sites.
-    Stall detection: if progress freezes for 2 min, collect whatever is there.
-    """
-    deadline  = time.time() + timeout
-    last_pct  = -1
-    stall_by  = time.time() + 120
-
-    while time.time() < deadline:
-        pct = scanner.active_scan_progress(ascan_id)
-        job["progress"] = 36 + int(pct * 0.55)
-        job["message"]  = f"Active scan… {pct}% complete"
-
-        if pct != last_pct:
-            last_pct = pct
-            stall_by = time.time() + 120   # reset on movement
-
-        if pct >= 100:
-            logger.info(f"[{scan_id}] Active scan finished.")
-            return
-
-        if time.time() > stall_by:
-            logger.warning(f"Active scan stalled at {pct}% — collecting alerts now.")
-            return
-
-        time.sleep(4)
-
-    logger.warning("Active scan timed out — collecting alerts anyway.")

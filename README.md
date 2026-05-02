@@ -1,6 +1,6 @@
-# VulnScan — OWASP ZAP Vulnerability Scanner
+# VulnScan — Manual Web Vulnerability Scanner
 
-A full-stack web application for automated vulnerability scanning, built with **React**, **FastAPI**, and **OWASP ZAP**.
+A full-stack web application for automated vulnerability scanning, built with **React** and **FastAPI** using a lightweight manual scanning engine.
 
 ---
 
@@ -10,7 +10,7 @@ A full-stack web application for automated vulnerability scanning, built with **
 vuln-scanner/
 ├── backend/
 │   ├── main.py               # FastAPI app & scan orchestration
-│   ├── zap_scanner.py        # All ZAP API communication
+│   ├── manual_scanner.py     # BFS crawler + manual vulnerability checks
 │   ├── report_generator.py   # PDF report generation (ReportLab)
 │   └── requirements.txt
 └── frontend/
@@ -32,41 +32,7 @@ vuln-scanner/
 |------|---------|---------|
 | Python | 3.9+ | Backend runtime |
 | Node.js | 18+ | Frontend runtime |
-| OWASP ZAP | 2.14+ | Security scanner |
-| Java | 11+ | Required by ZAP |
-
----
-
-## Step 1 — Start ZAP in Daemon Mode
-
-ZAP must be running **before** you start the backend.
-
-```bash
-# Linux / macOS
-zap.sh -daemon -port 8080 -host 127.0.0.1 \
-       -config api.key=changeme \
-       -config api.addrs.addr.name=.* \
-       -config api.addrs.addr.regex=true
-
-# Windows
-zap.bat -daemon -port 8080 -host 127.0.0.1 \
-        -config api.key=changeme \
-        -config api.addrs.addr.name=.* \
-        -config api.addrs.addr.regex=true
-```
-
-> **Tip:** `zap.sh` / `zap.bat` lives in your ZAP installation directory.
-> On macOS with Homebrew it may be at `/Applications/ZAP.app/Contents/Java/zap.sh`.
-
-Verify ZAP is running:
-```bash
-curl "http://127.0.0.1:8080/JSON/core/view/version/?apikey=changeme"
-# Should return {"version":"2.x.x"}
-```
-
----
-
-## Step 2 — Start the FastAPI Backend
+## Step 1 — Start the FastAPI Backend
 
 ```bash
 cd vuln-scanner/backend
@@ -88,7 +54,7 @@ Swagger docs: http://localhost:8000/docs
 
 ---
 
-## Step 3 — Start the React Frontend
+## Step 2 — Start the React Frontend
 
 ```bash
 cd vuln-scanner/frontend
@@ -115,17 +81,9 @@ FastAPI (port 8000)
      │
      │  1. Validates URL
      │  2. Starts background task
-     │
-     │  ZAP REST API (port 8080)
-     │  ├─ spider/action/scan        → crawl all pages
-     │  ├─ ascan/action/disableAll   → disable all rules
-     │  ├─ ascan/action/enable       → enable chosen rules only
-     │  ├─ ascan/action/scan         → active attack scan
-     │  └─ core/view/alerts          → fetch findings
-     │
-     │  3. Filter alerts by selected vuln types
-     │  4. Enrich with plain-English explanations
-     │  5. Return JSON to frontend
+     │  3. Crawls the target with BFS
+     │  4. Runs manual checks for the selected vulnerability classes
+     │  5. Returns normalized findings to the frontend
      ▼
 Browser renders results table
      │
@@ -159,15 +117,15 @@ curl -X POST http://localhost:8000/scan/start \
 
 ---
 
-## Vulnerability Categories & ZAP Rules
+## Vulnerability Categories & Manual Checks
 
-| Category | ZAP Plugin IDs |
+| Category | Heuristic Used |
 |----------|---------------|
-| SQL Injection | 40018, 40019, 40020, 40021, 40022, 40024, 90018 |
-| XSS | 40012, 40014, 40016, 40017 |
-| CSRF | 20012 |
-| Broken Authentication | 10105, 10200, 10202, 40003 |
-| Directory Traversal | 6, 33 |
+| SQL Injection | Inject simple SQL payloads into discovered query parameters and look for SQL errors / server faults |
+| XSS | Reflect a script payload through query params or forms and check whether it comes back unescaped |
+| CSRF | Inspect POST forms for missing CSRF-style hidden tokens |
+| Broken Authentication | Check for insecure login forms, session IDs in URLs, and weak session cookie flags |
+| Directory Traversal | Probe file-like parameters with traversal payloads and look for known sensitive file markers |
 
 ---
 
@@ -175,15 +133,7 @@ curl -X POST http://localhost:8000/scan/start \
 
 | Setting | Location | Default |
 |---------|----------|---------|
-| ZAP host/port | `backend/zap_scanner.py` | `127.0.0.1:8080` |
-| ZAP API key | `backend/.env` or project `.env` | none |
 | Backend URL | `frontend/.env` (create if needed) | `http://localhost:8000` |
-
-To configure the backend ZAP API key:
-```bash
-# backend/.env
-ZAP_API_KEY=your-zap-api-key
-```
 
 To change the backend URL for the frontend:
 ```bash
@@ -207,8 +157,8 @@ Use these intentionally vulnerable sites for testing:
 
 ## Troubleshooting
 
-**"Cannot connect to ZAP"**
-→ ZAP is not running. Follow Step 1.
+**"Scan failed"**
+→ Ensure the backend is running and that the target site is reachable from the machine running FastAPI.
 
 **CORS errors in browser**
 → Ensure FastAPI is running on port 8000 and the `proxy` in `package.json` matches.
@@ -225,6 +175,5 @@ Use these intentionally vulnerable sites for testing:
 
 - [React 18](https://react.dev) — Frontend UI
 - [FastAPI](https://fastapi.tiangolo.com) — Backend API
-- [OWASP ZAP](https://www.zaproxy.org) — Security scanning engine
 - [ReportLab](https://www.reportlab.com) — PDF generation
 - [DM Sans](https://fonts.google.com/specimen/DM+Sans) + [Space Mono](https://fonts.google.com/specimen/Space+Mono) — Typography
