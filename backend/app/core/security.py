@@ -1,6 +1,4 @@
-"""
-Password hashing and session token helpers.
-"""
+"""Password hashing and session token helpers."""
 
 from __future__ import annotations
 

@@ -1,24 +1,13 @@
-"""
-Database models and session helpers for the WAVS backend.
-"""
+"""Database models."""
 
 from __future__ import annotations
 
-import os
 from datetime import datetime, timezone
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, create_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg://wavs:wavs@localhost:5432/wavs",
-)
-
-
-class Base(DeclarativeBase):
-    pass
+from app.db.base import Base
 
 
 class User(Base):
@@ -76,17 +65,3 @@ class ScanRecord(Base):
     )
 
     user: Mapped[User] = relationship(back_populates="scans")
-
-
-engine = create_engine(DATABASE_URL, future=True)
-SessionLocal = sessionmaker(
-    bind=engine,
-    autoflush=False,
-    autocommit=False,
-    future=True,
-    expire_on_commit=False,
-)
-
-
-def init_db() -> None:
-    Base.metadata.create_all(bind=engine)
