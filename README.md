@@ -1,179 +1,89 @@
-# VulnScan — Manual Web Vulnerability Scanner
+# WAVS
 
-A full-stack web application for automated vulnerability scanning, built with **React** and **FastAPI** using a lightweight manual scanning engine.
+WAVS is a React + FastAPI vulnerability scanner with:
 
----
+- user signup and login
+- Postgres-backed sessions and scan history
+- PDF report regeneration for past scans
+- a Docker Compose Postgres service for local development
 
-## Project Structure
+## Project Layout
 
-```
-vuln-scanner/
+```text
+wavs-new/
 ├── backend/
-│   ├── main.py               # FastAPI app & scan orchestration
-│   ├── manual_scanner.py     # BFS crawler + manual vulnerability checks
-│   ├── report_generator.py   # PDF report generation (ReportLab)
+│   ├── main.py
+│   ├── database.py
+│   ├── security.py
+│   ├── scanner.py
+│   ├── report_generator.py
 │   └── requirements.txt
-└── frontend/
-    ├── public/
-    │   └── index.html
-    ├── src/
-    │   ├── index.js
-    │   ├── index.css
-    │   ├── App.jsx            # Main React component
-    │   └── App.css
-    └── package.json
+├── frontend/
+│   ├── src/
+│   └── package.json
+└── docker-compose.yml
 ```
 
----
-
-## Prerequisites
-
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Python | 3.9+ | Backend runtime |
-| Node.js | 18+ | Frontend runtime |
-## Step 1 — Start the FastAPI Backend
+## 1. Start Postgres
 
 ```bash
-cd vuln-scanner/backend
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start the server
-uvicorn main:app --reload --port 8000
+docker compose up -d
 ```
 
-The API is now available at http://localhost:8000
+This starts a local Postgres 16 instance on `localhost:5432` with:
 
-Swagger docs: http://localhost:8000/docs
+- database: `wavs`
+- username: `wavs`
+- password: `wavs`
 
----
-
-## Step 2 — Start the React Frontend
+## 2. Start the Backend
 
 ```bash
-cd vuln-scanner/frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm start
+bash run_backend.sh
 ```
 
-Open http://localhost:3000 in your browser.
-
----
-
-## How It Works
-
-```
-Browser (React)
-     │
-     │  POST /scan/start  { target_url, vulnerabilities }
-     ▼
-FastAPI (port 8000)
-     │
-     │  1. Validates URL
-     │  2. Starts background task
-     │  3. Crawls the target with BFS
-     │  4. Runs manual checks for the selected vulnerability classes
-     │  5. Returns normalized findings to the frontend
-     ▼
-Browser renders results table
-     │
-     │  GET /scan/report/{id}
-     ▼
-FastAPI generates PDF (ReportLab) → browser downloads
-```
-
----
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/health` | Health check |
-| POST | `/scan/start` | Start a new scan |
-| GET | `/scan/status/{id}` | Poll scan progress |
-| GET | `/scan/results/{id}` | Fetch final results |
-| GET | `/scan/report/{id}` | Download PDF report |
-
-### Example request
+The backend expects `DATABASE_URL` to point at Postgres. The default already matches the Docker setup:
 
 ```bash
-curl -X POST http://localhost:8000/scan/start \
-  -H "Content-Type: application/json" \
-  -d '{
-    "target_url": "http://testphp.vulnweb.com",
-    "vulnerabilities": ["sql_injection", "xss"]
-  }'
+postgresql+psycopg://wavs:wavs@localhost:5432/wavs
 ```
 
----
+Backend URLs:
 
-## Vulnerability Categories & Manual Checks
+- API: `http://localhost:8000`
+- Swagger: `http://localhost:8000/docs`
 
-| Category | Heuristic Used |
-|----------|---------------|
-| SQL Injection | Inject simple SQL payloads into discovered query parameters and look for SQL errors / server faults |
-| XSS | Reflect a script payload through query params or forms and check whether it comes back unescaped |
-| CSRF | Inspect POST forms for missing CSRF-style hidden tokens |
-| Broken Authentication | Check for insecure login forms, session IDs in URLs, and weak session cookie flags |
-| Directory Traversal | Probe file-like parameters with traversal payloads and look for known sensitive file markers |
+## 3. Start the Frontend
 
----
-
-## Configuration
-
-| Setting | Location | Default |
-|---------|----------|---------|
-| Backend URL | `frontend/.env` (create if needed) | `http://localhost:8000` |
-
-To change the backend URL for the frontend:
 ```bash
-# frontend/.env
-REACT_APP_API_URL=http://localhost:8000
+bash run_frontend.sh
 ```
 
----
+The React app runs on `http://localhost:3000`.
 
-## Testing Against Safe Targets
+## Main API Endpoints
 
-Use these intentionally vulnerable sites for testing:
+Auth:
 
-- **DVWA** (local): https://github.com/digininja/DVWA
-- **WebGoat** (local): https://github.com/WebGoat/WebGoat
-- **testphp.vulnweb.com** (Acunetix demo site — scan at your own risk)
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /auth/me`
+- `POST /auth/logout`
 
-> ⚠️ **Only scan systems you own or have explicit written permission to test.**
+Scanning:
 
----
+- `POST /scan/start`
+- `GET /scan/status/{scan_id}`
+- `GET /scan/results/{scan_id}`
+- `GET /scan/report/{scan_id}`
 
-## Troubleshooting
+History:
 
-**"Scan failed"**
-→ Ensure the backend is running and that the target site is reachable from the machine running FastAPI.
+- `GET /history`
+- `GET /history/{scan_id}`
 
-**CORS errors in browser**
-→ Ensure FastAPI is running on port 8000 and the `proxy` in `package.json` matches.
+## Notes
 
-**Spider / scan times out**
-→ Increase `timeout` values in `main.py` `_wait_for_spider` / `_wait_for_active_scan`.
-
-**PDF download fails**
-→ `reportlab` not installed. Run `pip install reportlab` inside your venv.
-
----
-
-## Built With
-
-- [React 18](https://react.dev) — Frontend UI
-- [FastAPI](https://fastapi.tiangolo.com) — Backend API
-- [ReportLab](https://www.reportlab.com) — PDF generation
-- [DM Sans](https://fonts.google.com/specimen/DM+Sans) + [Space Mono](https://fonts.google.com/specimen/Space+Mono) — Typography
+- Scan history is tied to the logged-in user.
+- PDF reports can be downloaded again from the history screen.
+- Only scan systems you own or are explicitly allowed to test.

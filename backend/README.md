@@ -1,22 +1,45 @@
 # Backend Setup
 
-The backend now uses a built-in manual scanner. There is no OWASP ZAP dependency.
+## Database
 
-## Start the backend
+The backend now uses Postgres for:
+
+- user accounts
+- login sessions
+- persisted scan history
+- report lookup metadata
+
+Default connection string:
 
 ```bash
-uvicorn main:app --reload
+postgresql+psycopg://wavs:wavs@localhost:5432/wavs
 ```
 
-The API will be available at `http://localhost:8000`.
+Start Postgres from the project root:
 
-## What the scanner does
+```bash
+docker compose up -d
+```
 
-- Crawls the target site with a small BFS crawler.
-- Extracts same-origin links and forms.
-- Runs five manual checks: SQL injection, XSS, CSRF, broken authentication, and directory traversal.
+## Run the API
+
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Key Endpoints
+
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /auth/me`
+- `POST /auth/logout`
+- `POST /scan/start`
+- `GET /history`
+- `GET /history/{scan_id}`
+- `GET /scan/report/{scan_id}`
 
 ## Notes
 
-- Only scan systems you own or are explicitly allowed to test.
-- The scanner uses lightweight heuristics, so it favors simplicity over exhaustive coverage.
+- Tables are created automatically on startup.
+- Scan execution is still asynchronous, but the scan record is now persisted immediately.
+- Completed reports are regenerated on demand if the saved file path no longer exists.

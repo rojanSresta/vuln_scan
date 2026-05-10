@@ -1,48 +1,67 @@
-/* ── Reset & base ─────────────────────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
-  --bg:          #0b0e14;
-  --bg2:         #111520;
-  --bg3:         #161b27;
-  --surface:     #1a2133;
-  --surface2:    #1f2940;
-  --border:      #2a3550;
-  --border2:     #344060;
-  --text:        #e2e8f4;
-  --text2:       #8b9cc4;
-  --text3:       #5a6a8a;
-  --accent:      #00d4aa;
-  --accent2:     #00b894;
-  --accent-dim:  rgba(0,212,170,0.12);
-  --high:        #ff5757;
-  --high-bg:     rgba(255,87,87,0.10);
-  --med:         #ffb347;
-  --med-bg:      rgba(255,179,71,0.10);
-  --low:         #4a9eff;
-  --low-bg:      rgba(74,158,255,0.10);
-  --info:        #8b9cc4;
-  --info-bg:     rgba(139,156,196,0.08);
-  --font-mono:   'Space Mono', monospace;
-  --font-sans:   'DM Sans', sans-serif;
-  --radius:      8px;
-  --radius-lg:   14px;
-  --shadow:      0 4px 24px rgba(0,0,0,0.5);
-  --glow:        0 0 24px rgba(0,212,170,0.15);
+  --bg: #0b0f0d;
+  --panel: #111715;
+  --panel-soft: #161f1b;
+  --border: #25342d;
+  --text: #e8f1ec;
+  --text-soft: #c9d7cf;
+  --text-muted: #90a59a;
+  --accent: #1ba162;
+  --risk-high: #ff6b6b;
+  --risk-high-bg: rgba(255, 107, 107, 0.12);
+  --risk-medium: #ffd166;
+  --risk-medium-bg: rgba(255, 209, 102, 0.12);
+  --risk-low: #7bd3a6;
+  --risk-low-bg: rgba(123, 211, 166, 0.12);
+  --risk-info: #9ab8a6;
+  --risk-info-bg: rgba(154, 184, 166, 0.12);
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-html { font-size: 16px; scroll-behavior: smooth; }
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
 
 body {
-  font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--text);
   min-height: 100vh;
-  line-height: 1.6;
+  background: linear-gradient(180deg, #0b0f0d 0%, #101613 100%);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Scrollbar ────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg2); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+button,
+input {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f1512;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a3b33;
+  border-radius: 999px;
+}
