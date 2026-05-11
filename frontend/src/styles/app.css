@@ -9,6 +9,8 @@
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 24px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
 }
 
 .brand {
@@ -22,7 +24,7 @@
 }
 
 .button {
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 10px;
   padding: 11px 16px;
   font-weight: 600;
@@ -30,7 +32,7 @@
 
 .button-primary {
   background: var(--accent);
-  color: #08120d;
+  color: #f8fbf8;
 }
 
 .button-primary:disabled {
@@ -42,6 +44,15 @@
   background: var(--panel-soft);
   color: var(--text);
   border: 1px solid var(--border);
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.button-secondary:hover {
+  background: #f1f5f0;
+  border-color: var(--border-strong);
 }
 
 .topbar {
@@ -56,10 +67,11 @@
 .topbar-nav {
   display: flex;
   gap: 8px;
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.75);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 4px;
+  box-shadow: 0 10px 26px rgba(52, 69, 58, 0.05);
 }
 
 .topbar-user {

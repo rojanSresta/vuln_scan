@@ -12,7 +12,7 @@
 
 .history-item {
   border: 1px solid var(--border);
-  background: var(--panel-soft);
+  background: #ffffff;
   border-radius: 12px;
   padding: 14px;
   text-align: left;
@@ -24,8 +24,14 @@
 }
 
 .history-item.active {
-  border-color: rgba(27, 161, 98, 0.45);
-  background: rgba(27, 161, 98, 0.14);
+  border-color: rgba(20, 108, 67, 0.35);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px rgba(20, 108, 67, 0.08);
+}
+
+.history-item:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
 }
 
 .history-meta {
@@ -37,18 +43,18 @@
 .status-queued,
 .status-spidering,
 .status-scanning {
-  background: rgba(27, 161, 98, 0.12);
-  color: #8ef0be;
+  background: rgba(20, 108, 67, 0.1);
+  color: var(--accent-strong);
 }
 
 .status-done {
-  background: rgba(27, 161, 98, 0.18);
-  color: #bbffd8;
+  background: rgba(20, 108, 67, 0.14);
+  color: var(--accent-strong);
 }
 
 .status-error {
-  background: rgba(255, 89, 89, 0.12);
-  color: #ffb0b0;
+  background: #fff2f2;
+  color: #983737;
 }
 
 .detail-grid {

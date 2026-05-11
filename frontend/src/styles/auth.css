@@ -40,8 +40,9 @@
   gap: 8px;
   margin-bottom: 18px;
   padding: 4px;
-  background: var(--panel-soft);
+  background: #eef3ec;
   border-radius: 12px;
+  border: 1px solid var(--border);
 }
 
 .tabs button,
@@ -68,8 +69,9 @@
 
 .tabs button.active,
 .topbar-nav button.active {
-  background: rgba(27, 161, 98, 0.18);
-  color: var(--text);
+  background: #ffffff;
+  color: var(--accent-strong);
+  box-shadow: 0 8px 20px rgba(52, 69, 58, 0.08);
 }
 
 .field {
@@ -87,7 +89,7 @@
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--panel-soft);
+  background: #ffffff;
   color: var(--text);
   padding: 12px 14px;
   outline: none;
@@ -95,7 +97,7 @@
 
 .field input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(27, 161, 98, 0.14);
+  box-shadow: 0 0 0 3px rgba(20, 108, 67, 0.12);
 }
 
 .alert {
@@ -105,7 +107,7 @@
 }
 
 .alert.error {
-  background: rgba(255, 89, 89, 0.12);
-  border: 1px solid rgba(255, 89, 89, 0.22);
-  color: #ffc9c9;
+  background: #fff2f2;
+  border: 1px solid #efcaca;
+  color: #8c2f2f;
 }
