@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { TOKEN_KEY, API } from "../constants";
 import { apiFetch } from "../services/api";
+import { formatApiError } from "../utils/errors";
 
 const EMPTY_AUTH_FORM = { full_name: "", email: "", password: "" };
 
@@ -67,7 +68,7 @@ export function useAuth() {
 
       if (!response.ok) {
         const errorPayload = await response.json();
-        throw new Error(errorPayload.detail || "Authentication failed");
+        throw new Error(formatApiError(errorPayload.detail, "Authentication failed"));
       }
 
       const data = await response.json();
@@ -76,10 +77,12 @@ export function useAuth() {
       setUser(data.user);
       setAuthForm(EMPTY_AUTH_FORM);
       setAuthError("");
-      return data;
+      return true;
     } catch (error) {
-      setAuthError(error.message);
-      throw error;
+      const message =
+        error instanceof Error ? error.message : formatApiError(error, "Authentication failed");
+      setAuthError(message);
+      return false;
     } finally {
       setAuthBusy(false);
     }

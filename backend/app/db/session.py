@@ -23,7 +23,9 @@ SessionLocal = sessionmaker(
 
 
 def init_db() -> None:
-    Base.metadata.create_all(bind=engine)
+    from app.db.bootstrap import bootstrap_database
+
+    bootstrap_database()
 
 
 @contextmanager

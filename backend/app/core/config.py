@@ -20,6 +20,10 @@ CORS_ORIGINS = [
 
 TOKEN_KEY = os.getenv("TOKEN_KEY", "wavs_token")
 
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@wavs.local").lower()
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin12345")
+ADMIN_FULL_NAME = os.getenv("ADMIN_FULL_NAME", "System Admin")
+
 ALLOWED_VULNERABILITIES = {
     "sql_injection",
     "xss",

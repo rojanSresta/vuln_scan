@@ -1,4 +1,5 @@
 import { API } from "../constants";
+import { formatApiError } from "../utils/errors";
 
 export async function apiFetch(path, { token, ...options } = {}) {
   const headers = new Headers(options.headers || {});
@@ -15,7 +16,7 @@ export async function apiFetch(path, { token, ...options } = {}) {
     let detail = "Request failed";
     try {
       const payload = await response.json();
-      detail = payload.detail || detail;
+      detail = formatApiError(payload.detail, detail);
     } catch {
       detail = response.statusText || detail;
     }

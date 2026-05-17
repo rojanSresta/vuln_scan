@@ -28,6 +28,7 @@ def signup(payload: AuthRequest, db: Session = Depends(get_db)) -> AuthResponse:
         email=payload.email.lower(),
         full_name=payload.full_name,
         password_hash=hash_password(payload.password),
+        is_admin=False,
     )
     db.add(user)
     db.flush()

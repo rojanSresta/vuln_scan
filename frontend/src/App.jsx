@@ -1,22 +1,41 @@
-import React from "react";
+import React, { useEffect } from "react";
+import AdminApp from "./components/admin/AdminApp";
+import AdminAuthPage from "./components/admin/AdminAuthPage";
 import AuthPage from "./components/auth/AuthPage";
 import HistoryView from "./components/history/HistoryView";
 import Topbar from "./components/layout/Topbar";
 import ScanView from "./components/scan/ScanView";
+import { useAdminAuth } from "./hooks/useAdminAuth";
+import { useAdminPanel } from "./hooks/useAdminPanel";
 import { useAuth } from "./hooks/useAuth";
 import { useScanner } from "./hooks/useScanner";
+import { useAdminRoute } from "./utils/navigation";
 import "./styles/app.css";
 import "./styles/auth.css";
 import "./styles/history.css";
 import "./styles/results.css";
 import "./styles/scan.css";
+import "./styles/admin.css";
 
 export default function App() {
+  const { onAdminRoute, isAdminLoginPath, goToAdminHome, goToAdminLogin } = useAdminRoute();
   const auth = useAuth();
+  const admin = useAdminAuth();
   const scanner = useScanner(auth.token);
+  const adminPanel = useAdminPanel(admin.token);
+
+  useEffect(() => {
+    if (!onAdminRoute) return;
+    if (admin.user && isAdminLoginPath) {
+      goToAdminHome();
+    } else if (!admin.user && !isAdminLoginPath) {
+      goToAdminLogin();
+    }
+  }, [admin.user, goToAdminHome, goToAdminLogin, isAdminLoginPath, onAdminRoute]);
 
   const handleAuth = async () => {
-    await auth.handleAuth();
+    const ok = await auth.handleAuth();
+    if (!ok) return;
     scanner.setView("scan");
     scanner.setErrorMsg("");
     await scanner.loadHistory();
@@ -26,6 +45,36 @@ export default function App() {
     await auth.logout();
     scanner.setView("scan");
   };
+
+  const handleAdminLogin = async () => {
+    const ok = await admin.login();
+    if (!ok) return;
+    goToAdminHome();
+    adminPanel.setView("overview");
+    await adminPanel.refresh();
+  };
+
+  const handleAdminLogout = async () => {
+    await admin.logout();
+    adminPanel.setView("overview");
+    goToAdminLogin();
+  };
+
+  if (onAdminRoute) {
+    if (!admin.user) {
+      return (
+        <AdminAuthPage
+          busy={admin.busy}
+          error={admin.error}
+          form={admin.form}
+          onFieldChange={admin.setField}
+          onLogin={handleAdminLogin}
+        />
+      );
+    }
+
+    return <AdminApp admin={{ ...admin, logout: handleAdminLogout }} panel={adminPanel} />;
+  }
 
   if (!auth.user) {
     return (

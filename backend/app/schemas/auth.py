@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import re
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from app.schemas.validators import AppEmail
 
 
 class AuthRequest(BaseModel):
     full_name: str | None = None
-    email: EmailStr
+    email: AppEmail
     password: str = Field(min_length=8, max_length=128)
 
     @field_validator("full_name")
@@ -27,8 +29,9 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    email: EmailStr
+    email: AppEmail
     full_name: str
+    is_admin: bool = False
 
 
 class AuthResponse(BaseModel):
