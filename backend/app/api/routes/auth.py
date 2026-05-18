@@ -8,15 +8,14 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, parse_bearer_token
 from app.core.security import generate_session_token, hash_password, verify_password
-from app.db import Session as UserSession
 from app.db import User, get_db
-from app.schemas.auth import AuthRequest, AuthResponse, UserResponse
+from app.schemas.auth import AuthRequest, AuthResponse, SignupResponse, UserResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/signup", response_model=AuthResponse)
-def signup(payload: AuthRequest, db: Session = Depends(get_db)) -> AuthResponse:
+@router.post("/signup", response_model=SignupResponse)
+def signup(payload: AuthRequest, db: Session = Depends(get_db)) -> SignupResponse:
     if not payload.full_name:
         raise HTTPException(status_code=422, detail="Full name is required")
 
@@ -31,13 +30,8 @@ def signup(payload: AuthRequest, db: Session = Depends(get_db)) -> AuthResponse:
         is_admin=False,
     )
     db.add(user)
-    db.flush()
-
-    token = generate_session_token()
-    db.add(UserSession(token=token, user_id=user.id))
     db.commit()
-    db.refresh(user)
-    return AuthResponse(token=token, user=user)
+    return SignupResponse(message="Signed up successfully. Please log in.")
 
 
 @router.post("/login", response_model=AuthResponse)

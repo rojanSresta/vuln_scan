@@ -37,3 +37,7 @@ class UserResponse(BaseModel):
 class AuthResponse(BaseModel):
     token: str
     user: UserResponse
+
+
+class SignupResponse(BaseModel):
+    message: str

@@ -34,8 +34,8 @@ export default function App() {
   }, [admin.user, goToAdminHome, goToAdminLogin, isAdminLoginPath, onAdminRoute]);
 
   const handleAuth = async () => {
-    const ok = await auth.handleAuth();
-    if (!ok) return;
+    const result = await auth.handleAuth();
+    if (!result.ok || result.mode !== "login") return;
     scanner.setView("scan");
     scanner.setErrorMsg("");
     await scanner.loadHistory();
@@ -83,6 +83,7 @@ export default function App() {
         authError={auth.authError}
         authForm={auth.authForm}
         authMode={auth.authMode}
+        authSuccess={auth.authSuccess}
         onAuth={handleAuth}
         onFieldChange={auth.setAuthField}
         onModeChange={auth.setAuthMode}

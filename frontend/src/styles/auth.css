@@ -100,6 +100,54 @@
   box-shadow: 0 0 0 3px rgba(20, 108, 67, 0.12);
 }
 
+.password-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  padding-right: 8px;
+}
+
+.password-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(20, 108, 67, 0.12);
+}
+
+.password-input input {
+  border: 0;
+  box-shadow: none;
+}
+
+.password-input input:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.password-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+  color: var(--accent-strong);
+  background: #eef3ec;
+  outline: none;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
 .alert {
   border-radius: 10px;
   padding: 12px 14px;
@@ -110,4 +158,10 @@
   background: #fff2f2;
   border: 1px solid #efcaca;
   color: #8c2f2f;
+}
+
+.alert.success {
+  background: #effaf2;
+  border: 1px solid #bde4c6;
+  color: #22663b;
 }
