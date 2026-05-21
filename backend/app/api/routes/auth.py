@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, parse_bearer_token
 from app.core.security import generate_session_token, hash_password, verify_password
+from app.db import Session as UserSession
 from app.db import User, get_db
 from app.schemas.auth import AuthRequest, AuthResponse, SignupResponse, UserResponse
 

@@ -4,13 +4,20 @@ from __future__ import annotations
 
 from typing import Any, Iterable, List, Sequence
 
-from app.services.scanning.base import DEFAULT_VULNERABILITIES, HttpClient, ProgressCallback, RISK_CODES, VulnerabilityFinding, WebCrawler
+from app.services.scanning.base import (
+    DEFAULT_VULNERABILITIES,
+    HttpClient,
+    ProgressCallback,
+    RISK_CODES,
+    VulnerabilityFinding,
+    WebCrawler,
+)
 from app.services.scanning.checks import BrokenAuthCheck, CSRFCheck, DirectoryTraversalCheck, SQLInjectionCheck, XSSCheck
 
 
 class ManualVulnerabilityScanner:
-    def __init__(self):
-        self.client = HttpClient()
+    def __init__(self, cancel_callback=None):
+        self.client = HttpClient(cancel_callback=cancel_callback)
         self.crawler = WebCrawler(self.client)
         self.checks = {
             "sql_injection": SQLInjectionCheck(self.client),

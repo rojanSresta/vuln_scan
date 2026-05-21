@@ -57,6 +57,11 @@
   color: #983737;
 }
 
+.status-cancelled {
+  background: #f5efe1;
+  color: #8a6424;
+}
+
 .detail-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 16px;

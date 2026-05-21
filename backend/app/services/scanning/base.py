@@ -14,6 +14,10 @@ logger = logging.getLogger(__name__)
 
 ProgressCallback = Callable[[int, str], None]
 
+
+class ScanCancelledError(Exception):
+    """Raised when a scan is cancelled by the user."""
+
 DEFAULT_VULNERABILITIES = [
     "sql_injection",
     "xss",
@@ -152,8 +156,9 @@ class HTMLDocumentParser(HTMLParser):
 
 
 class HttpClient:
-    def __init__(self):
+    def __init__(self, cancel_callback: Callable[[], None] | None = None):
         self.session = requests.Session()
+        self.cancel_callback = cancel_callback
         self.session.headers.update(
             {
                 "User-Agent": "WAVS-Manual-Scanner/1.0",
@@ -162,10 +167,16 @@ class HttpClient:
         )
 
     def get(self, url: str, params: Optional[Dict[str, str]] = None) -> requests.Response:
+        self._check_cancelled()
         return self.session.get(url, params=params, timeout=12, allow_redirects=True)
 
     def post(self, url: str, data: Dict[str, str]) -> requests.Response:
+        self._check_cancelled()
         return self.session.post(url, data=data, timeout=12, allow_redirects=True)
+
+    def _check_cancelled(self) -> None:
+        if self.cancel_callback:
+            self.cancel_callback()
 
 
 class WebCrawler:

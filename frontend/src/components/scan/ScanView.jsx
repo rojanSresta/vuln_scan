@@ -6,12 +6,12 @@ import RiskStrip from "../common/RiskStrip";
 
 export default function ScanView({
   canStart,
+  cancelScan,
   downloadReport,
   expandedRows,
   history,
   historyLoading,
   onHistoryOpen,
-  onReset,
   onRowToggle,
   onScanAllToggle,
   onStartScan,
@@ -76,9 +76,11 @@ export default function ScanView({
           <button className="button button-primary" disabled={!canStart || phase === "scanning"} onClick={onStartScan}>
             {phase === "scanning" ? "Scanning..." : "Start Scan"}
           </button>
-          <button className="button button-secondary" onClick={onReset}>
-            Reset
-          </button>
+          {phase === "scanning" && (
+            <button className="button button-secondary" onClick={cancelScan}>
+              Cancel
+            </button>
+          )}
         </div>
       </section>
 

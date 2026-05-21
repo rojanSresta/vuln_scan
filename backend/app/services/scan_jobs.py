@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import select
 
 from app.db import ScanRecord, session_scope, utc_now
+from app.services.scanning.base import ScanCancelledError
 from app.services.scanning.service import ManualVulnerabilityScanner
 
 logger = logging.getLogger(__name__)
@@ -59,12 +60,29 @@ def update_scan_record(scan_id: str, **fields: Any) -> None:
         record.updated_at = utc_now()
 
 
+def request_scan_cancel(scan_id: str) -> bool:
+    job = scan_jobs.get(scan_id)
+    if not job or job.get("status") in {"done", "error", "cancelled"}:
+        return False
+
+    job["cancel_requested"] = True
+    job["status"] = "cancelled"
+    job["message"] = "Cancelling scan..."
+    update_scan_record(scan_id, status="cancelled", message=job["message"])
+    return True
+
+
 def run_scan(scan_id: str, user_id: int, target_url: str, vulnerabilities: list[str]) -> None:
     del user_id
     job = scan_jobs[scan_id]
 
     try:
-        scanner = ManualVulnerabilityScanner()
+        def ensure_not_cancelled() -> None:
+            if job.get("cancel_requested"):
+                raise ScanCancelledError("Scan cancelled by user.")
+
+        scanner = ManualVulnerabilityScanner(cancel_callback=ensure_not_cancelled)
+        ensure_not_cancelled()
         job["status"] = "spidering"
         job["message"] = "Preparing scan..."
         job["progress"] = 2
@@ -72,6 +90,7 @@ def run_scan(scan_id: str, user_id: int, target_url: str, vulnerabilities: list[
         logger.info("[%s] Manual scan start -> %s", scan_id, target_url)
 
         def on_progress(progress: int, message: str) -> None:
+            ensure_not_cancelled()
             status = "spidering" if progress < 35 else "scanning"
             job["progress"] = progress
             job["message"] = message
@@ -84,6 +103,7 @@ def run_scan(scan_id: str, user_id: int, target_url: str, vulnerabilities: list[
             progress_callback=on_progress,
         )
 
+        ensure_not_cancelled()
         job["results"] = results
         job["status"] = "done"
         job["progress"] = 100
@@ -97,6 +117,16 @@ def run_scan(scan_id: str, user_id: int, target_url: str, vulnerabilities: list[
         )
         logger.info("[%s] Done: %s findings", scan_id, len(results))
 
+    except ScanCancelledError:
+        logger.info("[%s] Scan cancelled", scan_id)
+        job["status"] = "cancelled"
+        job["message"] = "Scan cancelled."
+        update_scan_record(
+            scan_id,
+            status="cancelled",
+            message=job["message"],
+            results=[],
+        )
     except Exception as exc:
         logger.exception("[%s] Scan error: %s", scan_id, exc)
         job["status"] = "error"

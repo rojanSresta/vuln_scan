@@ -14,7 +14,7 @@ from app.api.deps import get_current_user
 from app.db import ScanRecord, User, session_scope, utc_now
 from app.schemas.scan import ScanRequest, ScanStatus
 from app.services.reporting.pdf import generate_pdf_report
-from app.services.scan_jobs import load_scan, require_scan, run_scan, scan_jobs, update_scan_record
+from app.services.scan_jobs import load_scan, request_scan_cancel, require_scan, run_scan, scan_jobs, update_scan_record
 
 router = APIRouter(prefix="/scan", tags=["scan"])
 
@@ -75,6 +75,19 @@ def get_status(scan_id: str, current_user: User = Depends(get_current_user)) -> 
         )
 
     record = require_scan(scan_id, current_user.id)
+    return ScanStatus(
+        scan_id=record.scan_id,
+        status=record.status,
+        progress=record.progress,
+        message=record.message,
+    )
+
+
+@router.post("/cancel/{scan_id}", response_model=ScanStatus)
+def cancel_scan(scan_id: str, current_user: User = Depends(get_current_user)) -> ScanStatus:
+    record = require_scan(scan_id, current_user.id)
+    request_scan_cancel(scan_id)
+    record = load_scan(scan_id, current_user.id) or record
     return ScanStatus(
         scan_id=record.scan_id,
         status=record.status,

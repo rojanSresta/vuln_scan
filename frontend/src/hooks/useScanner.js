@@ -37,6 +37,26 @@ export function useScanner(token) {
     setExpandedRows({});
   };
 
+  const cancelScan = async () => {
+    if (!scanId || phase !== "scanning") return;
+
+    stopPolling();
+    setStatusMsg("Cancelling scan...");
+
+    try {
+      const response = await apiFetch(`/scan/cancel/${scanId}`, { method: "POST", token });
+      const payload = await response.json();
+      setProgress(payload.progress ?? 0);
+      setStatusMsg(payload.message || "Scan cancelled.");
+      setPhase("cancelled");
+      setResults([]);
+      await loadHistory(scanId);
+    } catch (error) {
+      setErrorMsg(error.message);
+      setPhase("error");
+    }
+  };
+
   const loadHistory = async (preferredScanId = null) => {
     if (!token) return;
     setHistoryLoading(true);
@@ -102,6 +122,11 @@ export function useScanner(token) {
         setPhase("done");
         await loadHistory(id);
         setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth" }), 200);
+      } else if (statusData.status === "cancelled") {
+        stopPolling();
+        setResults([]);
+        setPhase("cancelled");
+        await loadHistory(id);
       } else if (statusData.status === "error") {
         stopPolling();
         setErrorMsg(statusData.message);
@@ -185,6 +210,7 @@ export function useScanner(token) {
 
   return {
     canStart,
+    cancelScan,
     downloadReport,
     errorMsg,
     expandedRows,

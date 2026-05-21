@@ -101,12 +101,12 @@ export default function App() {
         {scanner.view === "scan" && (
           <ScanView
             canStart={scanner.canStart}
+            cancelScan={scanner.cancelScan}
             downloadReport={scanner.downloadReport}
             expandedRows={scanner.expandedRows}
             history={scanner.history}
             historyLoading={scanner.historyLoading}
             onHistoryOpen={scanner.openHistoryItem}
-            onReset={scanner.resetScanState}
             onRowToggle={(index) =>
               scanner.setExpandedRows((current) => ({ ...current, [index]: !current[index] }))
             }
