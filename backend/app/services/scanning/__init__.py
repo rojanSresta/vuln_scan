@@ -1,1 +1,1 @@
-"""Vulnerability scanning module"""
+"""Scanning services."""
