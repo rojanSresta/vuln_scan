@@ -1,1 +1,1 @@
-"""Pydantic schemas."""
+"""Schemas module"""

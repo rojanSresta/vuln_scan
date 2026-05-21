@@ -1,1 +1,1 @@
-"""Core backend helpers."""
+"""Core module"""
