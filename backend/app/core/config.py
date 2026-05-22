@@ -13,10 +13,15 @@ DATABASE_URL = os.getenv(
     "postgresql+psycopg://wavs:wavs@localhost:5432/wavs",
 )
 
-CORS_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+_cors_raw = os.getenv("CORS_ORIGINS", "")
+CORS_ORIGINS = (
+    [origin.strip() for origin in _cors_raw.split(",") if origin.strip()]
+    if _cors_raw
+    else [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+)
 
 TOKEN_KEY = os.getenv("TOKEN_KEY", "wavs_token")
 
