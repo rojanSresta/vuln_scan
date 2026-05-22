@@ -1,0 +1,57 @@
+.risk-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.risk-pill,
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.results-list {
+  display: grid;
+  gap: 14px;
+}
+
+.result-item {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.result-top,
+.result-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.result-meta {
+  margin-top: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.text-link {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  padding: 0;
+  font-weight: 600;
+}
+
+.result-details {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}

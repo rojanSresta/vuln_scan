@@ -1,40 +1,45 @@
-# Backend ZAP setup
+# Backend Setup
 
-This backend now expects OWASP ZAP to run in Docker instead of requiring a locally installed desktop app.
+## Database
 
-## Configure
+The backend now uses Postgres for:
 
-Create or update `.env` in this directory:
+- user accounts
+- login sessions
+- persisted scan history
+- report lookup metadata
 
-```env
-ZAP_API_KEY=changeme
-ZAP_BASE_URL=http://127.0.0.1:8080
-```
-
-`ZAP_BASE_URL` should stay `http://127.0.0.1:8080` when the backend runs on your host machine and ZAP runs through the included Docker Compose file.
-
-## Start ZAP
+Default connection string:
 
 ```bash
-docker compose up -d zap
+postgresql+psycopg://wavs:wavs@localhost:5432/wavs
 ```
 
-To stop it:
+Start Postgres from the project root:
 
 ```bash
-docker compose stop zap
+docker compose up -d
 ```
 
-To inspect logs:
+## Run the API
 
 ```bash
-docker compose logs -f zap
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## Start the backend
+## Key Endpoints
 
-```bash
-uvicorn main:app --reload
-```
+- `POST /auth/signup`
+- `POST /auth/login`
+- `GET /auth/me`
+- `POST /auth/logout`
+- `POST /scan/start`
+- `GET /history`
+- `GET /history/{scan_id}`
+- `GET /scan/report/{scan_id}`
 
-The backend will connect to the ZAP API exposed by the container on port `8080`.
+## Notes
+
+- Tables are created automatically on startup.
+- Scan execution is still asynchronous, but the scan record is now persisted immediately.
+- Completed reports are regenerated on demand if the saved file path no longer exists.
