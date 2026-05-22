@@ -1,6 +1,5 @@
 import React from "react";
 import { VULN_OPTIONS } from "../../constants";
-import { formatDate, safeHostname } from "../../utils/format";
 import ResultsTable from "../common/ResultsTable";
 import RiskStrip from "../common/RiskStrip";
 
@@ -9,9 +8,6 @@ export default function ScanView({
   cancelScan,
   downloadReport,
   expandedRows,
-  history,
-  historyLoading,
-  onHistoryOpen,
   onRowToggle,
   onScanAllToggle,
   onStartScan,
@@ -25,12 +21,11 @@ export default function ScanView({
   scanAll,
   scanId,
   selected,
-  statusMsg,
   targetUrl,
 }) {
   return (
     <div className="content-grid">
-      <section className="simple-card">
+      <section className="simple-card full-width">
         <div className="section-head">
           <div>
             <h2>Start a new scan</h2>
@@ -84,39 +79,10 @@ export default function ScanView({
         </div>
       </section>
 
-      <aside className="simple-card side-card">
-        <h3>Quick Info</h3>
-        <div className="stats">
-          <div className="stat-box">
-            <span>Saved scans</span>
-            <strong>{history.length}</strong>
-          </div>
-          <div className="stat-box">
-            <span>Completed</span>
-            <strong>{history.filter((item) => item.status === "done").length}</strong>
-          </div>
-        </div>
-
-        <div className="mini-list">
-          <h4>Recent reports</h4>
-          {historyLoading && <p className="muted">Loading history...</p>}
-          {!historyLoading && history.length === 0 && <p className="muted">No saved reports yet.</p>}
-          {history.slice(0, 4).map((item) => (
-            <button key={item.scan_id} className="mini-item" onClick={() => onHistoryOpen(item)}>
-              <strong>{safeHostname(item.target_url)}</strong>
-              <span>{formatDate(item.created_at)}</span>
-            </button>
-          ))}
-        </div>
-      </aside>
-
       {phase === "scanning" && (
         <section className="simple-card full-width">
           <div className="section-head">
-            <div>
-              <h2>Scan progress</h2>
-              <p>{statusMsg}</p>
-            </div>
+            <h2>Scanning</h2>
             <strong className="progress-label">{progress}%</strong>
           </div>
 

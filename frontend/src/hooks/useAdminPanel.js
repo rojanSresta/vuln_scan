@@ -1,18 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../services/api";
+import { buildQuery } from "../utils/query";
 
 export const ADMIN_PAGE_SIZE = 10;
-
-function buildQuery(params) {
-  const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      search.set(key, String(value));
-    }
-  });
-  const query = search.toString();
-  return query ? `?${query}` : "";
-}
 
 export function useAdminPanel(token) {
   const [view, setView] = useState("overview");
@@ -26,7 +16,6 @@ export function useAdminPanel(token) {
   const [usersMeta, setUsersMeta] = useState({ total: 0, total_pages: 1 });
   const [usersLoading, setUsersLoading] = useState(false);
 
-  const [userOptions, setUserOptions] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [scans, setScans] = useState([]);
   const [scansPage, setScansPage] = useState(1);
@@ -41,7 +30,7 @@ export function useAdminPanel(token) {
 
   const fetchUsers = useCallback(
     async (page) => {
-      if (!token) return;
+      if (!token) return [];
       setUsersLoading(true);
       setError("");
       try {
@@ -50,29 +39,23 @@ export function useAdminPanel(token) {
           { method: "GET", token }
         );
         const payload = await response.json();
-        setUsers(payload.items || []);
+        const items = payload.items || [];
+        setUsers(items);
         setUsersPage(payload.page || page);
         setUsersMeta({
           total: payload.total || 0,
           total_pages: payload.total_pages || 1,
         });
+        return items;
       } catch (err) {
         setError(err.message);
+        return [];
       } finally {
         setUsersLoading(false);
       }
     },
     [token]
   );
-
-  const fetchUserOptions = useCallback(async () => {
-    if (!token) return [];
-    const response = await apiFetch("/admin/users/options", { method: "GET", token });
-    const payload = await response.json();
-    const items = payload.items || [];
-    setUserOptions(items);
-    return items;
-  }, [token]);
 
   const fetchScans = useCallback(
     async (userId, page) => {
@@ -117,48 +100,54 @@ export function useAdminPanel(token) {
     }
   }, [loadStats, token]);
 
+  const refreshManage = useCallback(async () => {
+    const items = await fetchUsers(usersPage);
+    const userId = selectedUserId || (items[0] ? String(items[0].id) : "");
+    if (userId && !selectedUserId) {
+      setSelectedUserId(userId);
+    }
+    if (userId) {
+      await fetchScans(userId, scansPage);
+    }
+  }, [fetchScans, fetchUsers, scansPage, selectedUserId, usersPage]);
+
   useEffect(() => {
     if (!token || view !== "overview") return;
     refreshOverview();
   }, [refreshOverview, token, view]);
 
   useEffect(() => {
-    if (!token || view !== "users") return;
-    fetchUsers(usersPage);
-  }, [fetchUsers, token, usersPage, view]);
-
-  useEffect(() => {
-    if (!token || view !== "scans") return;
-    fetchUserOptions().then((options) => {
-      if (!options.length) {
+    if (!token || view !== "manage") return;
+    fetchUsers(usersPage).then((items) => {
+      if (!items.length) {
         setSelectedUserId("");
         return;
       }
-      setSelectedUserId((current) => current || String(options[0].id));
+      const stillVisible = items.some((user) => String(user.id) === String(selectedUserId));
+      if (!selectedUserId || !stillVisible) {
+        setSelectedUserId(String(items[0].id));
+        setScansPage(1);
+        setSelectedScan(null);
+      }
     });
-  }, [fetchUserOptions, token, view]);
+  }, [fetchUsers, selectedUserId, token, usersPage, view]);
 
   useEffect(() => {
-    if (!token || view !== "scans" || !selectedUserId) return;
+    if (!token || view !== "manage" || !selectedUserId) return;
     fetchScans(selectedUserId, scansPage);
   }, [fetchScans, scansPage, selectedUserId, token, view]);
 
   const refresh = async () => {
     if (view === "overview") {
       await refreshOverview();
-    } else if (view === "users") {
-      await fetchUsers(usersPage);
-    } else if (view === "scans") {
-      const options = await fetchUserOptions();
-      const userId = selectedUserId || (options[0] ? String(options[0].id) : "");
-      if (userId) {
-        await fetchScans(userId, scansPage);
-      }
+    } else if (view === "manage") {
+      await refreshManage();
     }
   };
 
   const changeUsersPage = (page) => {
     setUsersPage(page);
+    setSelectedScan(null);
   };
 
   const changeScansPage = (page) => {
@@ -182,19 +171,14 @@ export function useAdminPanel(token) {
         setSelectedScan(null);
         setScans([]);
       }
-      const options = await fetchUserOptions();
-      if (view === "users") {
-        const nextPage = users.length === 1 && usersPage > 1 ? usersPage - 1 : usersPage;
-        setUsersPage(nextPage);
-        await fetchUsers(nextPage);
-      }
-      if (view === "scans") {
-        const nextId = options[0] ? String(options[0].id) : "";
-        setSelectedUserId(nextId);
-        setScansPage(1);
-        if (nextId) {
-          await fetchScans(nextId, 1);
-        }
+      const nextPage = users.length === 1 && usersPage > 1 ? usersPage - 1 : usersPage;
+      setUsersPage(nextPage);
+      const items = await fetchUsers(nextPage);
+      const nextId = items[0] ? String(items[0].id) : "";
+      setSelectedUserId(nextId);
+      setScansPage(1);
+      if (nextId) {
+        await fetchScans(nextId, 1);
       }
       if (view === "overview") {
         await refreshOverview();
@@ -223,7 +207,7 @@ export function useAdminPanel(token) {
       if (view === "overview") {
         await refreshOverview();
       }
-      await fetchUserOptions();
+      await fetchUsers(usersPage);
     } catch (err) {
       setError(err.message);
       throw err;
@@ -233,11 +217,12 @@ export function useAdminPanel(token) {
   };
 
   const openScan = async (scan) => {
-    setView("scans");
+    setView("manage");
     setSelectedUserId(String(scan.user_id));
     setSelectedScan(scan);
     setScansPage(1);
-    await fetchUserOptions();
+    setUsersPage(1);
+    await fetchUsers(1);
     await fetchScans(String(scan.user_id), 1);
   };
 
@@ -261,7 +246,6 @@ export function useAdminPanel(token) {
     setSelectedScan,
     setView,
     stats,
-    userOptions,
     users,
     usersLoading,
     usersMeta,

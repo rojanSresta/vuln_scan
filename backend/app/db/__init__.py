@@ -1,8 +1,18 @@
-"""Database exports."""
+"""Compatibility alias — prefer app.database in new code."""
 
-from app.db.base import Base
-from app.db.models import ScanRecord, Session, User
-from app.db.session import SessionLocal, engine, get_db, init_db, session_scope, utc_now
+from app.database import (
+    Base,
+    ScanRecord,
+    Session,
+    SessionLocal,
+    User,
+    UserSession,
+    engine,
+    get_db,
+    init_db,
+    session_scope,
+    utc_now,
+)
 
 __all__ = [
     "Base",
@@ -10,6 +20,7 @@ __all__ = [
     "Session",
     "SessionLocal",
     "User",
+    "UserSession",
     "engine",
     "get_db",
     "init_db",

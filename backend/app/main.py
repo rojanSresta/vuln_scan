@@ -1,4 +1,4 @@
-"""FastAPI app factory."""
+"""FastAPI application entry point."""
 
 from __future__ import annotations
 
@@ -7,9 +7,9 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.router import api_router
-from app.core.config import APP_DESCRIPTION, APP_TITLE, APP_VERSION, CORS_ORIGINS
-from app.db import init_db
+from app.config import APP_DESCRIPTION, APP_TITLE, APP_VERSION, CORS_ORIGINS
+from app.database import init_db
+from app.router import api_router
 
 logging.basicConfig(level=logging.INFO)
 

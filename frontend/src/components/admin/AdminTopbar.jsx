@@ -12,11 +12,8 @@ export default function AdminTopbar({ user, view, onViewChange, onLogout, onRefr
         <button className={view === "overview" ? "active" : ""} onClick={() => onViewChange("overview")}>
           Overview
         </button>
-        <button className={view === "users" ? "active" : ""} onClick={() => onViewChange("users")}>
-          Users
-        </button>
-        <button className={view === "scans" ? "active" : ""} onClick={() => onViewChange("scans")}>
-          Scan records
+        <button className={view === "manage" ? "active" : ""} onClick={() => onViewChange("manage")}>
+          Users & scans
         </button>
       </nav>
 

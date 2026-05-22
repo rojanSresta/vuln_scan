@@ -37,7 +37,6 @@ export default function ResultsTable({ items, expandedRows, onToggleRow, readOnl
               <div className="result-details">
                 <p><strong>Description:</strong> {item.description}</p>
                 <p><strong>Solution:</strong> {item.solution || "Review the affected endpoint and apply the relevant security control."}</p>
-                {item.reference && <p><strong>Reference:</strong> {item.reference}</p>}
               </div>
             )}
           </div>

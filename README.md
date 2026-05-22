@@ -81,22 +81,41 @@ bash run_frontend.sh
 
 The React dev server runs on http://localhost:3000.
 
-## Project Layout
+## Project Layout (OOP)
 
 ```text
-wavs-new/
-├── backend/
-│   ├── Dockerfile
-│   ├── main.py
-│   └── requirements.txt
-├── frontend/
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── package.json
+vuln_scan/
+├── backend/app/
+│   ├── main.py                 # App entry
+│   ├── config.py               # Settings
+│   ├── security.py             # PasswordHasher, TokenFactory
+│   ├── router.py               # Registers controllers
+│   ├── controllers/            # HTTP layer (classes)
+│   │   ├── auth_controller.py
+│   │   ├── scan_controller.py
+│   │   ├── history_controller.py
+│   │   └── admin_controller.py
+│   ├── services/               # Business logic (classes)
+│   │   ├── auth_service.py
+│   │   ├── scan_service.py
+│   │   ├── history_service.py
+│   │   ├── admin_service.py
+│   │   └── report_service.py
+│   ├── scanner/                # Vulnerability engine (classes)
+│   │   ├── scan_engine.py
+│   │   ├── sql_check.py, xss_check.py, path_check.py, ...
+│   │   └── payloads/
+│   ├── database/               # ORM models
+│   │   ├── models.py
+│   │   ├── connection.py
+│   │   └── setup.py
+│   └── schemas/                # Request/response models
+├── frontend/src/
+│   ├── components/             # UI (unchanged look)
+│   ├── hooks/
+│   └── services/api_client.js  # ApiClient class
 ├── docker-compose.yml
-├── .env.example
-├── run_backend.sh
-└── run_frontend.sh
+└── run_backend.sh / run_frontend.sh
 ```
 
 ## Main API Endpoints
