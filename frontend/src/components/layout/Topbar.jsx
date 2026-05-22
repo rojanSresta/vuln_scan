@@ -5,7 +5,7 @@ export default function Topbar({ user, view, onViewChange, onLogout }) {
     <header className="topbar">
       <div>
         <div className="brand">WAVS</div>
-        <p className="topbar-subtitle">Manual vulnerability scanner</p>
+        <p className="topbar-subtitle">Find vulnerabilities before they find you</p>
       </div>
 
       <nav className="topbar-nav">

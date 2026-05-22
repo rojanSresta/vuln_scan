@@ -18,9 +18,10 @@
   text-align: left;
   color: var(--text);
   align-items: flex-start;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
   gap: 16px;
+  width: 100%;
 }
 
 .history-item.active {
@@ -38,6 +39,17 @@
   display: grid;
   justify-items: end;
   gap: 8px;
+  white-space: nowrap;
+}
+
+.history-item > div:first-child {
+  min-width: 0;
+}
+
+.history-item strong,
+.history-item span:not(.status-badge) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .status-queued,
@@ -78,6 +90,10 @@
 }
 
 @media (max-width: 640px) {
+  .history-item {
+    grid-template-columns: 1fr;
+  }
+
   .detail-grid {
     grid-template-columns: 1fr;
   }

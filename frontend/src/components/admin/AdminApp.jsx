@@ -1,8 +1,7 @@
 import React from "react";
+import AdminManagePanel from "./AdminManagePanel";
 import AdminOverview from "./AdminOverview";
-import AdminScansPanel from "./AdminScansPanel";
 import AdminTopbar from "./AdminTopbar";
-import AdminUsersPanel from "./AdminUsersPanel";
 
 export default function AdminApp({ admin, panel }) {
   return (
@@ -22,21 +21,12 @@ export default function AdminApp({ admin, panel }) {
 
         {panel.view === "overview" && <AdminOverview stats={panel.stats} onOpenScan={panel.openScan} />}
 
-        {panel.view === "users" && (
-          <AdminUsersPanel
+        {panel.view === "manage" && (
+          <AdminManagePanel
             users={panel.users}
             usersMeta={panel.usersMeta}
             usersPage={panel.usersPage}
             usersLoading={panel.usersLoading}
-            actionBusy={panel.actionBusy}
-            onPageChange={panel.changeUsersPage}
-            onRemoveUser={panel.removeUser}
-          />
-        )}
-
-        {panel.view === "scans" && (
-          <AdminScansPanel
-            userOptions={panel.userOptions}
             selectedUserId={panel.selectedUserId}
             scans={panel.scans}
             scansMeta={panel.scansMeta}
@@ -45,8 +35,10 @@ export default function AdminApp({ admin, panel }) {
             selectedScan={panel.selectedScan}
             actionBusy={panel.actionBusy}
             onSelectUser={panel.changeSelectedUser}
-            onPageChange={panel.changeScansPage}
+            onUsersPageChange={panel.changeUsersPage}
+            onScansPageChange={panel.changeScansPage}
             onSelectScan={panel.setSelectedScan}
+            onRemoveUser={panel.removeUser}
             onRemoveScan={panel.removeScan}
           />
         )}

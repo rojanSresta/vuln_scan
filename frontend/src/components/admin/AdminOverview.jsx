@@ -6,8 +6,6 @@ export default function AdminOverview({ stats, onOpenScan }) {
     return <p className="muted">Loading overview...</p>;
   }
 
-  const statusEntries = Object.entries(stats.scans_by_status || {});
-
   return (
     <div className="admin-overview">
       <section className="admin-stat-grid">
@@ -19,31 +17,6 @@ export default function AdminOverview({ stats, onOpenScan }) {
           <span>Total scans</span>
           <strong>{stats.total_scans}</strong>
         </article>
-        <article className="admin-stat-card">
-          <span>Active sessions</span>
-          <strong>{stats.active_sessions}</strong>
-        </article>
-      </section>
-
-      <section className="simple-card">
-        <div className="section-head">
-          <div>
-            <h2>Scans by status</h2>
-            <p>Quick view of scan pipeline health across all accounts.</p>
-          </div>
-        </div>
-        {statusEntries.length === 0 ? (
-          <p className="muted">No scan records yet.</p>
-        ) : (
-          <div className="admin-status-grid">
-            {statusEntries.map(([status, count]) => (
-              <div key={status} className="admin-status-item">
-                <span className={`status-badge status-${status}`}>{status}</span>
-                <strong>{count}</strong>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
 
       <section className="simple-card">

@@ -15,7 +15,7 @@
 
 .admin-stat-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -149,6 +149,25 @@
   border: 0;
   padding: 8px;
   cursor: pointer;
+}
+
+.admin-manage-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.admin-users-select-table .admin-user-row {
+  cursor: pointer;
+}
+
+.admin-users-select-table .admin-user-row:hover {
+  background: var(--accent-soft);
+}
+
+.admin-users-select-table .admin-user-row-selected {
+  cursor: pointer;
+  background: var(--accent-soft);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 @media (max-width: 980px) {

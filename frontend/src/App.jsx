@@ -47,11 +47,10 @@ export default function App() {
   };
 
   const handleAdminLogin = async () => {
-    const ok = await admin.login();
-    if (!ok) return;
+    const result = await admin.login();
+    if (!result.ok) return;
     goToAdminHome();
-    adminPanel.setView("overview");
-    await adminPanel.refresh();
+    // Panel loads stats after admin.token updates (do not call refresh here — token is still stale).
   };
 
   const handleAdminLogout = async () => {
@@ -104,9 +103,6 @@ export default function App() {
             cancelScan={scanner.cancelScan}
             downloadReport={scanner.downloadReport}
             expandedRows={scanner.expandedRows}
-            history={scanner.history}
-            historyLoading={scanner.historyLoading}
-            onHistoryOpen={scanner.openHistoryItem}
             onRowToggle={(index) =>
               scanner.setExpandedRows((current) => ({ ...current, [index]: !current[index] }))
             }
@@ -122,7 +118,6 @@ export default function App() {
             scanAll={scanner.scanAll}
             scanId={scanner.scanId}
             selected={scanner.selected}
-            statusMsg={scanner.statusMsg}
             targetUrl={scanner.targetUrl}
           />
         )}

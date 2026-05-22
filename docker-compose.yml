@@ -26,7 +26,6 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://wavs:wavs@postgres:5432/wavs}
-      TOKEN_KEY: ${TOKEN_KEY:-wavs_token}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@wavs.local}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin12345}
