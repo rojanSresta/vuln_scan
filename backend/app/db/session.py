@@ -1,29 +1,53 @@
-"""Database session management"""
+"""Database session helpers."""
+
+from __future__ import annotations
 
 from contextlib import contextmanager
-from datetime import datetime
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from app.config import settings
+from datetime import datetime, timezone
+from typing import Iterator
 
-engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+
+from app.core.config import DATABASE_URL
+from app.db.base import Base
+
+engine = create_engine(DATABASE_URL, future=True)
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    autocommit=False,
+    future=True,
+    expire_on_commit=False,
+)
+
+
+def init_db() -> None:
+    from app.db.bootstrap import bootstrap_database
+
+    bootstrap_database()
 
 
 @contextmanager
-def session_scope():
-    """Provide a transactional scope for database operations"""
-    session = SessionLocal()
+def session_scope() -> Iterator[Session]:
+    db = SessionLocal()
     try:
-        yield session
-        session.commit()
+        yield db
+        db.commit()
     except Exception:
-        session.rollback()
+        db.rollback()
         raise
     finally:
-        session.close()
+        db.close()
+
+
+def get_db() -> Iterator[Session]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 def utc_now() -> datetime:
-    """Get current UTC datetime"""
-    return datetime.utcnow()
+    return datetime.now(timezone.utc)
