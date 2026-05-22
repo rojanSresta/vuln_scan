@@ -32,8 +32,8 @@ ADMIN_FULL_NAME = os.getenv("ADMIN_FULL_NAME", "System Admin")
 ALLOWED_VULNERABILITIES = {
     "sql_injection",
     "xss",
-    "csrf",
-    "broken_auth",
     "dir_traversal",
+    "missing_headers",
+    "default_credentials",
     "scan_all",
 }

