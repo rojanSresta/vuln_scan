@@ -5,9 +5,9 @@ export const ADMIN_TOKEN_KEY = process.env.ADMIN_TOKEN_KEY || "wavs_admin_token"
 export const VULN_OPTIONS = [
   { id: "sql_injection", label: "SQL Injection", desc: "Detect query manipulation attempts" },
   { id: "xss", label: "Cross-Site Scripting", desc: "Find reflected script injection points" },
-  { id: "csrf", label: "CSRF", desc: "Check forms for missing CSRF protections" },
-  { id: "broken_auth", label: "Broken Authentication", desc: "Inspect weak auth and session handling" },
   { id: "dir_traversal", label: "Directory Traversal", desc: "Probe unsafe file path access" },
+  { id: "missing_headers", label: "Missing Headers", desc: "Check for absent security response headers" },
+  { id: "default_credentials", label: "Default Credentials", desc: "Try common username and password pairs on login forms" },
 ];
 
 export const RISK_META = {

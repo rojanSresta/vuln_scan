@@ -12,7 +12,13 @@ from app.services.scanning.base import (
     VulnerabilityFinding,
     WebCrawler,
 )
-from app.services.scanning.checks import BrokenAuthCheck, CSRFCheck, DirectoryTraversalCheck, SQLInjectionCheck, XSSCheck
+from app.services.scanning.checks import (
+    DefaultCredentialsCheck,
+    DirectoryTraversalCheck,
+    MissingHeadersCheck,
+    SQLInjectionCheck,
+    XSSCheck,
+)
 
 
 class ManualVulnerabilityScanner:
@@ -22,9 +28,9 @@ class ManualVulnerabilityScanner:
         self.checks = {
             "sql_injection": SQLInjectionCheck(self.client),
             "xss": XSSCheck(self.client),
-            "csrf": CSRFCheck(self.client),
-            "broken_auth": BrokenAuthCheck(self.client),
             "dir_traversal": DirectoryTraversalCheck(self.client),
+            "missing_headers": MissingHeadersCheck(self.client),
+            "default_credentials": DefaultCredentialsCheck(self.client),
         }
 
     def scan(
@@ -77,8 +83,8 @@ class ManualVulnerabilityScanner:
         labels = {
             "sql_injection": "SQL injection",
             "xss": "XSS",
-            "csrf": "CSRF",
-            "broken_auth": "broken authentication",
             "dir_traversal": "directory traversal",
+            "missing_headers": "missing security headers",
+            "default_credentials": "default credentials",
         }
         return labels.get(category, category)
