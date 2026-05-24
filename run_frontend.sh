@@ -6,8 +6,12 @@ set -e
 
 cd "$(dirname "$0")/frontend"
 
-echo "Installing npm packages (first run may take a minute)…"
-npm install
+if [ ! -d "node_modules" ] || [ "package-lock.json" -nt "node_modules" ]; then
+  echo "Installing npm packages (first run may take a minute)…"
+  npm ci
+else
+  echo "Dependencies up to date, skipping install."
+fi
 
 echo ""
 echo "✅  Starting React on http://localhost:3000"

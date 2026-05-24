@@ -56,9 +56,6 @@ class AuthService:
         if admin_only and not user.is_admin:
             raise HTTPException(status_code=401, detail="Invalid admin credentials")
 
-        if PasswordHasher.needs_rehash(user.password_hash):
-            user.password_hash = PasswordHasher.hash(password)
-
         token = TokenFactory.create()
         db.add(UserSession(token=token, user_id=user.id))
         db.commit()

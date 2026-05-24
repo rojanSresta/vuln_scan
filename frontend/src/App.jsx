@@ -10,12 +10,6 @@ import { useAdminPanel } from "./hooks/useAdminPanel";
 import { useAuth } from "./hooks/useAuth";
 import { useScanner } from "./hooks/useScanner";
 import { useAdminRoute } from "./utils/navigation";
-import "./styles/app.css";
-import "./styles/auth.css";
-import "./styles/history.css";
-import "./styles/results.css";
-import "./styles/scan.css";
-import "./styles/admin.css";
 
 export default function App() {
   const { onAdminRoute, isAdminLoginPath, goToAdminHome, goToAdminLogin } = useAdminRoute();
