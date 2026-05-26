@@ -4,7 +4,8 @@
 
 set -e
 
-cd "$(dirname "$0")/backend"
+PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "$PROJECT_ROOT/backend"
 
 if [ ! -d "venv" ]; then
   echo "Creating virtual environment…"
@@ -19,6 +20,37 @@ source venv/bin/activate
 export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
 
 pip install -r requirements.txt -q
+
+DATABASE_URL="${DATABASE_URL:-postgresql+psycopg://wavs:wavs@localhost:5432/wavs}"
+export DATABASE_URL
+
+python - <<'PY'
+import os
+import socket
+import sys
+from urllib.parse import urlparse
+
+database_url = os.environ["DATABASE_URL"]
+parsed = urlparse(database_url)
+
+if parsed.scheme.startswith("postgresql"):
+    host = parsed.hostname or "localhost"
+    port = parsed.port or 5432
+    try:
+        with socket.create_connection((host, port), timeout=2):
+            pass
+    except OSError as exc:
+        print("")
+        print(f"Postgres is not reachable at {host}:{port}.")
+        print(f"Error: {exc}")
+        print("")
+        print("Start the local database first, then run this script again:")
+        print("  docker compose up -d postgres")
+        print("  bash run_backend.sh")
+        print("")
+        print("Or set DATABASE_URL to a running Postgres database.")
+        sys.exit(1)
+PY
 
 echo ""
 echo "✅  Starting FastAPI on http://localhost:8000"

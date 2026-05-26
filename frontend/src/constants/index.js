@@ -11,8 +11,8 @@ export const VULN_OPTIONS = [
 ];
 
 export const RISK_META = {
-  High: { color: "var(--risk-high)", bg: "var(--risk-high-bg)" },
-  Medium: { color: "var(--risk-medium)", bg: "var(--risk-medium-bg)" },
-  Low: { color: "var(--risk-low)", bg: "var(--risk-low-bg)" },
-  Informational: { color: "var(--risk-info)", bg: "var(--risk-info-bg)" },
+  High: { className: "text-risk-high bg-risk-high/10" },
+  Medium: { className: "text-risk-medium bg-risk-medium/10" },
+  Low: { className: "text-risk-low bg-risk-low/10" },
+  Informational: { className: "text-risk-info bg-risk-info/10" },
 };

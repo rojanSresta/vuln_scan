@@ -10,6 +10,7 @@ import { useAdminPanel } from "./hooks/useAdminPanel";
 import { useAuth } from "./hooks/useAuth";
 import { useScanner } from "./hooks/useScanner";
 import { useAdminRoute } from "./utils/navigation";
+import { alertError, page, shell } from "./ui/classes";
 
 export default function App() {
   const { onAdminRoute, isAdminLoginPath, goToAdminHome, goToAdminLogin } = useAdminRoute();
@@ -85,11 +86,11 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={shell}>
       <Topbar user={auth.user} view={scanner.view} onViewChange={scanner.setView} onLogout={handleLogout} />
 
-      <main className="page">
-        {scanner.errorMsg && <div className="alert error">Action failed: {scanner.errorMsg}</div>}
+      <main className={page}>
+        {scanner.errorMsg && <div className={alertError}>Action failed: {scanner.errorMsg}</div>}
 
         {scanner.view === "scan" && (
           <ScanView

@@ -1,9 +1,23 @@
 import React, { useMemo, useState } from "react";
 import { formatDate, safeHostname } from "../../utils/format";
 import { buildRiskStats } from "../../utils/risk";
+import { statusBadgeClass } from "../../utils/status";
+import {
+  btnDanger,
+  btnSecondary,
+  card,
+  muted,
+  sectionDesc,
+  sectionHead,
+  sectionTitle,
+} from "../../ui/classes";
 import ResultsTable from "../common/ResultsTable";
 import RiskStrip from "../common/RiskStrip";
 import AdminPagination from "./AdminPagination";
+
+const historyItemBase =
+  "w-full rounded-xl border border-wavs-border bg-white p-4 text-left transition hover:border-wavs-accent/30";
+const historyItemActive = "border-wavs-accent bg-wavs-accent/5 ring-1 ring-wavs-accent/20";
 
 export default function AdminManagePanel({
   users,
@@ -26,11 +40,7 @@ export default function AdminManagePanel({
 }) {
   const [expandedRows, setExpandedRows] = useState({});
 
-  const riskStats = useMemo(
-    () => buildRiskStats(selectedScan?.results),
-    [selectedScan]
-  );
-
+  const riskStats = useMemo(() => buildRiskStats(selectedScan?.results), [selectedScan]);
   const selectedUser = users.find((user) => String(user.id) === String(selectedUserId));
 
   const handleRemoveUser = async (user) => {
@@ -49,27 +59,30 @@ export default function AdminManagePanel({
   };
 
   return (
-    <div className="admin-manage-layout">
-      <section className="simple-card">
-        <div className="section-head">
+    <div className="space-y-6">
+      <section className={card}>
+        <div className={sectionHead}>
           <div>
-            <h2>Users & scan records</h2>
-            <p>Select a user to view and manage their scans. Remove test accounts (e.g. old signups) with Remove.</p>
+            <h2 className={sectionTitle}>Users & scan records</h2>
+            <p className={sectionDesc}>
+              Select a user to view and manage their scans. Remove test accounts (e.g. old signups) with
+              Remove.
+            </p>
           </div>
         </div>
 
-        {usersLoading && <p className="muted">Loading users...</p>}
+        {usersLoading && <p className={muted}>Loading users...</p>}
 
-        <div className="admin-table-wrap">
-          <table className="admin-table admin-users-select-table">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[720px] border-collapse text-left text-sm">
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Scans</th>
-                <th>Joined</th>
-                <th>Role</th>
-                <th />
+              <tr className="border-b border-wavs-border text-wavs-muted">
+                <th className="pb-3 pr-4 font-medium">Name</th>
+                <th className="pb-3 pr-4 font-medium">Email</th>
+                <th className="pb-3 pr-4 font-medium">Scans</th>
+                <th className="pb-3 pr-4 font-medium">Joined</th>
+                <th className="pb-3 pr-4 font-medium">Role</th>
+                <th className="pb-3 font-medium" />
               </tr>
             </thead>
             <tbody>
@@ -78,19 +91,21 @@ export default function AdminManagePanel({
                 return (
                   <tr
                     key={user.id}
-                    className={isSelected ? "admin-user-row-selected" : "admin-user-row"}
+                    className={`cursor-pointer border-b border-wavs-border/70 transition last:border-0 ${
+                      isSelected ? "bg-wavs-accent/5" : "hover:bg-wavs-soft"
+                    }`}
                     onClick={() => onSelectUser(String(user.id))}
                   >
-                    <td>{user.full_name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.scan_count}</td>
-                    <td>{formatDate(user.created_at)}</td>
-                    <td>{user.is_admin ? "Admin" : "User"}</td>
-                    <td>
+                    <td className="py-3 pr-4">{user.full_name}</td>
+                    <td className="py-3 pr-4">{user.email}</td>
+                    <td className="py-3 pr-4">{user.scan_count}</td>
+                    <td className="py-3 pr-4 text-wavs-muted">{formatDate(user.created_at)}</td>
+                    <td className="py-3 pr-4">{user.is_admin ? "Admin" : "User"}</td>
+                    <td className="py-3">
                       {!user.is_admin && (
                         <button
                           type="button"
-                          className="button button-secondary admin-danger-btn"
+                          className={btnDanger}
                           disabled={actionBusy}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -106,7 +121,7 @@ export default function AdminManagePanel({
               })}
             </tbody>
           </table>
-          {!usersLoading && users.length === 0 && <p className="muted">No users found.</p>}
+          {!usersLoading && users.length === 0 && <p className={`${muted} mt-4`}>No users found.</p>}
         </div>
 
         <AdminPagination
@@ -118,12 +133,12 @@ export default function AdminManagePanel({
         />
       </section>
 
-      <div className="history-grid admin-scans-grid">
-        <section className="simple-card">
-          <div className="section-head">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className={card}>
+          <div className={sectionHead}>
             <div>
-              <h2>Scan history</h2>
-              <p>
+              <h2 className={sectionTitle}>Scan history</h2>
+              <p className={sectionDesc}>
                 {selectedUser
                   ? `Scans for ${selectedUser.full_name} (${selectedUser.email})`
                   : "Select a user from the table above."}
@@ -131,27 +146,32 @@ export default function AdminManagePanel({
             </div>
           </div>
 
-          {scansLoading && <p className="muted">Loading scans...</p>}
-
+          {scansLoading && <p className={muted}>Loading scans...</p>}
           {!scansLoading && selectedUserId && scans.length === 0 && (
-            <p className="muted">No scan records for this user.</p>
+            <p className={muted}>No scan records for this user.</p>
           )}
 
-          <div className="history-list">
+          <div className="space-y-3">
             {scans.map((scan) => (
               <button
                 key={scan.scan_id}
                 type="button"
-                className={`history-item ${selectedScan?.scan_id === scan.scan_id ? "active" : ""}`}
+                className={`${historyItemBase} ${
+                  selectedScan?.scan_id === scan.scan_id ? historyItemActive : ""
+                }`}
                 onClick={() => onSelectScan(scan)}
               >
                 <div>
-                  <strong>{safeHostname(scan.target_url)}</strong>
-                  <span>{scan.target_url}</span>
+                  <strong className="block text-wavs-text">{safeHostname(scan.target_url)}</strong>
+                  <span className="mt-1 block break-all text-sm text-wavs-muted">{scan.target_url}</span>
                 </div>
-                <div className="history-meta">
-                  <span>{formatDate(scan.created_at)}</span>
-                  <span className={`status-badge status-${scan.status}`}>{scan.status}</span>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+                  <span className="text-wavs-muted">{formatDate(scan.created_at)}</span>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusBadgeClass(scan.status)}`}
+                  >
+                    {scan.status}
+                  </span>
                 </div>
               </button>
             ))}
@@ -166,17 +186,17 @@ export default function AdminManagePanel({
           />
         </section>
 
-        <section className="simple-card">
+        <section className={card}>
           {selectedScan ? (
             <>
-              <div className="section-head">
+              <div className={sectionHead}>
                 <div>
-                  <h2>Scan report</h2>
-                  <p>{selectedScan.target_url}</p>
+                  <h2 className={sectionTitle}>Scan report</h2>
+                  <p className={`${sectionDesc} break-all`}>{selectedScan.target_url}</p>
                 </div>
                 <button
                   type="button"
-                  className="button button-secondary admin-danger-btn"
+                  className={btnDanger}
                   disabled={actionBusy}
                   onClick={() => handleRemoveScan(selectedScan)}
                 >
@@ -184,22 +204,40 @@ export default function AdminManagePanel({
                 </button>
               </div>
 
-              <div className="detail-grid">
-                <div className="stat-box">
-                  <span>Status</span>
-                  <strong className={`status-badge status-${selectedScan.status}`}>{selectedScan.status}</strong>
+              <div className="mb-5 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-wavs-border bg-wavs-soft p-4">
+                  <span className="block text-xs font-medium uppercase tracking-wide text-wavs-muted">
+                    Status
+                  </span>
+                  <span
+                    className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusBadgeClass(selectedScan.status)}`}
+                  >
+                    {selectedScan.status}
+                  </span>
                 </div>
-                <div className="stat-box">
-                  <span>Checks</span>
-                  <strong>{(selectedScan.vulnerabilities || []).join(", ") || "None"}</strong>
+                <div className="rounded-xl border border-wavs-border bg-wavs-soft p-4">
+                  <span className="block text-xs font-medium uppercase tracking-wide text-wavs-muted">
+                    Checks
+                  </span>
+                  <strong className="mt-1 block text-sm text-wavs-text">
+                    {(selectedScan.vulnerabilities || []).join(", ") || "None"}
+                  </strong>
                 </div>
-                <div className="stat-box">
-                  <span>Findings</span>
-                  <strong>{selectedScan.results?.length || 0}</strong>
+                <div className="rounded-xl border border-wavs-border bg-wavs-soft p-4">
+                  <span className="block text-xs font-medium uppercase tracking-wide text-wavs-muted">
+                    Findings
+                  </span>
+                  <strong className="mt-1 block text-sm text-wavs-text">
+                    {selectedScan.results?.length || 0}
+                  </strong>
                 </div>
-                <div className="stat-box">
-                  <span>Updated</span>
-                  <strong>{formatDate(selectedScan.updated_at)}</strong>
+                <div className="rounded-xl border border-wavs-border bg-wavs-soft p-4">
+                  <span className="block text-xs font-medium uppercase tracking-wide text-wavs-muted">
+                    Updated
+                  </span>
+                  <strong className="mt-1 block text-sm text-wavs-text">
+                    {formatDate(selectedScan.updated_at)}
+                  </strong>
                 </div>
               </div>
 
@@ -213,7 +251,7 @@ export default function AdminManagePanel({
               />
             </>
           ) : (
-            <p className="muted">Select a scan to review findings.</p>
+            <p className={muted}>Select a scan to review findings.</p>
           )}
         </section>
       </div>

@@ -1,10 +1,24 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
+import {
+  alertError,
+  alertSuccess,
+  brand,
+  btnPrimary,
+  card,
+  field,
+  fieldLabel,
+  input,
+  sectionDesc,
+  sectionTitle,
+  tabBtn,
+  tabBtnActive,
+  tabs,
+} from "../../ui/classes";
 
 function EyeIcon({ open }) {
   if (open) {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
+      <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
         <path
           d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"
           fill="none"
@@ -13,20 +27,13 @@ function EyeIcon({ open }) {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle
-          cx="12"
-          cy="12"
-          r="3"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
+        <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
       </svg>
     );
   }
 
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
+    <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
       <path
         d="M3 3l18 18"
         fill="none"
@@ -77,27 +84,36 @@ export default function AuthPage({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <div className="auth-page">
-      <div className="simple-card auth-card">
-        <div className="auth-header">
-          <div className="brand">WAVS</div>
-          <h1>Login to continue</h1>
-          <p>Use your account to run scans and review saved reports.</p>
+    <div className="flex min-h-screen items-center justify-center px-4 py-10">
+      <div className={`${card} w-full max-w-md`}>
+        <div className="mb-6 text-center">
+          <div className={brand}>WAVS</div>
+          <h1 className={sectionTitle}>Login to continue</h1>
+          <p className={sectionDesc}>Use your account to run scans and review saved reports.</p>
         </div>
 
-        <div className="tabs">
-          <button className={authMode === "login" ? "active" : ""} onClick={() => onModeChange("login")}>
+        <div className={tabs}>
+          <button
+            type="button"
+            className={authMode === "login" ? tabBtnActive : tabBtn}
+            onClick={() => onModeChange("login")}
+          >
             Login
           </button>
-          <button className={authMode === "signup" ? "active" : ""} onClick={() => onModeChange("signup")}>
+          <button
+            type="button"
+            className={authMode === "signup" ? tabBtnActive : tabBtn}
+            onClick={() => onModeChange("signup")}
+          >
             Sign Up
           </button>
         </div>
 
         {authMode === "signup" && (
-          <label className="field">
-            <span>Full name</span>
+          <label className={field}>
+            <span className={fieldLabel}>Full name</span>
             <input
+              className={input}
               type="text"
               value={authForm.full_name}
               onChange={(event) => onFieldChange("full_name", event.target.value)}
@@ -106,9 +122,10 @@ export default function AuthPage({
           </label>
         )}
 
-        <label className="field">
-          <span>Email</span>
+        <label className={field}>
+          <span className={fieldLabel}>Email</span>
           <input
+            className={input}
             type="email"
             value={authForm.email}
             onChange={(event) => onFieldChange("email", event.target.value)}
@@ -116,10 +133,11 @@ export default function AuthPage({
           />
         </label>
 
-        <label className="field">
-          <span>Password</span>
-          <div className="password-input">
+        <label className={field}>
+          <span className={fieldLabel}>Password</span>
+          <div className="relative">
             <input
+              className={`${input} pr-11`}
               type={showPassword ? "text" : "password"}
               value={authForm.password}
               onChange={(event) => onFieldChange("password", event.target.value)}
@@ -127,7 +145,7 @@ export default function AuthPage({
             />
             <button
               type="button"
-              className="password-toggle"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-wavs-muted hover:bg-wavs-soft hover:text-wavs-text"
               aria-label={showPassword ? "Hide password" : "Show password"}
               onClick={() => setShowPassword((current) => !current)}
             >
@@ -137,10 +155,11 @@ export default function AuthPage({
         </label>
 
         {authMode === "signup" && (
-          <label className="field">
-            <span>Confirm password</span>
-            <div className="password-input">
+          <label className={field}>
+            <span className={fieldLabel}>Confirm password</span>
+            <div className="relative">
               <input
+                className={`${input} pr-11`}
                 type={showConfirmPassword ? "text" : "password"}
                 value={authForm.confirm_password}
                 onChange={(event) => onFieldChange("confirm_password", event.target.value)}
@@ -148,7 +167,7 @@ export default function AuthPage({
               />
               <button
                 type="button"
-                className="password-toggle"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-wavs-muted hover:bg-wavs-soft hover:text-wavs-text"
                 aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowConfirmPassword((current) => !current)}
               >
@@ -158,10 +177,10 @@ export default function AuthPage({
           </label>
         )}
 
-        {authSuccess && <div className="alert success">{authSuccess}</div>}
-        {authError && <div className="alert error">{authError}</div>}
+        {authSuccess && <div className={alertSuccess}>{authSuccess}</div>}
+        {authError && <div className={alertError}>{authError}</div>}
 
-        <button className="button button-primary" onClick={onAuth} disabled={authBusy}>
+        <button type="button" className={`${btnPrimary} w-full`} onClick={onAuth} disabled={authBusy}>
           {authBusy ? "Please wait..." : authMode === "signup" ? "Create account" : "Login"}
         </button>
       </div>

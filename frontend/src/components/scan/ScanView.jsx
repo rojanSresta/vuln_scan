@@ -1,5 +1,16 @@
 import React from "react";
 import { VULN_OPTIONS } from "../../constants";
+import {
+  btnPrimary,
+  btnSecondary,
+  card,
+  field,
+  fieldLabel,
+  input,
+  sectionDesc,
+  sectionHead,
+  sectionTitle,
+} from "../../ui/classes";
 import ResultsTable from "../common/ResultsTable";
 import RiskStrip from "../common/RiskStrip";
 
@@ -23,19 +34,24 @@ export default function ScanView({
   selected,
   targetUrl,
 }) {
+  const optionBase =
+    "w-full rounded-xl border border-wavs-border bg-green=500 p-4 text-left transition hover:border-wavs-accent/40 disabled:cursor-not-allowed disabled:opacity-50";
+  const optionActive = "border-wavs-accent bg-wavs-accent/5 ring-1 ring-wavs-accent/20";
+
   return (
-    <div className="content-grid">
-      <section className="simple-card full-width">
-        <div className="section-head">
+    <div className="space-y-6">
+      <section className={card}>
+        <div className={sectionHead}>
           <div>
-            <h2>Start a new scan</h2>
-            <p>Select a target and the checks you want to run.</p>
+            <h2 className={sectionTitle}>Start a new scan</h2>
+            <p className={sectionDesc}>Select a target and the checks you want to run.</p>
           </div>
         </div>
 
-        <label className="field">
-          <span>Target URL</span>
+        <label className={field}>
+          <span className={fieldLabel}>Target URL</span>
           <input
+            className={input}
             type="text"
             value={targetUrl}
             onChange={(event) => onTargetUrlChange(event.target.value)}
@@ -44,35 +60,42 @@ export default function ScanView({
           />
         </label>
 
-        <div className="option-list">
+        <div className="mb-5 grid gap-3 sm:grid-cols-2">
           <button
-            className={`option-item ${scanAll ? "active" : ""}`}
+            type="button"
+            className={`${optionBase} ${scanAll ? optionActive : ""}`}
             onClick={onScanAllToggle}
             disabled={phase === "scanning"}
           >
-            <strong>Scan All</strong>
-            <span>Run every available check</span>
+            <strong className="block text-wavs-text">Scan All</strong>
+            <span className="mt-1 block text-sm text-wavs-muted">Run every available check</span>
           </button>
 
           {VULN_OPTIONS.map((item) => (
             <button
               key={item.id}
-              className={`option-item ${selected.includes(item.id) && !scanAll ? "active" : ""}`}
+              type="button"
+              className={`${optionBase} ${selected.includes(item.id) && !scanAll ? optionActive : ""}`}
               onClick={() => !scanAll && onVulnToggle(item.id)}
               disabled={phase === "scanning" || scanAll}
             >
-              <strong>{item.label}</strong>
-              <span>{item.desc}</span>
+              <strong className="block text-wavs-text">{item.label}</strong>
+              <span className="mt-1 block text-sm text-wavs-muted">{item.desc}</span>
             </button>
           ))}
         </div>
 
-        <div className="actions">
-          <button className="button button-primary" disabled={!canStart || phase === "scanning"} onClick={onStartScan}>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            className={btnPrimary}
+            disabled={!canStart || phase === "scanning"}
+            onClick={onStartScan}
+          >
             {phase === "scanning" ? "Scanning..." : "Start Scan"}
           </button>
           {phase === "scanning" && (
-            <button className="button button-secondary" onClick={cancelScan}>
+            <button type="button" className={btnSecondary} onClick={cancelScan}>
               Cancel
             </button>
           )}
@@ -80,34 +103,35 @@ export default function ScanView({
       </section>
 
       {phase === "scanning" && (
-        <section className="simple-card full-width">
-          <div className="section-head">
-            <h2>Scanning</h2>
-            <strong className="progress-label">{progress}%</strong>
+        <section className={card}>
+          <div className={`${sectionHead} !mb-3`}>
+            <h2 className={sectionTitle}>Scanning</h2>
+            <strong className="text-lg font-semibold text-wavs-accent">{progress}%</strong>
           </div>
-
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          <div className="h-2.5 overflow-hidden rounded-full bg-wavs-border">
+            <div
+              className="h-full rounded-full bg-wavs-accent transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </section>
       )}
 
       {phase === "done" && (
-        <section ref={resultsRef} className="simple-card full-width">
-          <div className="section-head">
+        <section ref={resultsRef} className={card}>
+          <div className={sectionHead}>
             <div>
-              <h2>Scan results</h2>
-              <p>{results.length} finding(s) were recorded for this run.</p>
+              <h2 className={sectionTitle}>Scan results</h2>
+              <p className={sectionDesc}>{results.length} finding(s) were recorded for this run.</p>
             </div>
             {scanId && (
-              <button className="button button-secondary" onClick={() => downloadReport(scanId)}>
+              <button type="button" className={btnSecondary} onClick={() => downloadReport(scanId)}>
                 Download PDF
               </button>
             )}
           </div>
 
           <RiskStrip stats={riskStats} />
-
           <ResultsTable items={results} expandedRows={expandedRows} onToggleRow={onRowToggle} />
         </section>
       )}
