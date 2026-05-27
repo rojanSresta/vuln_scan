@@ -48,7 +48,7 @@ export const navPillActive =
   "rounded-lg bg-wavs-accent px-3.5 py-2 text-sm font-semibold text-white shadow-sm";
 
 export const topbar =
-  "flex flex-wrap items-center justify-between gap-4 border-b border-wavs-border pb-6";
+  "flex flex-wrap items-center justify-between gap-4 border-b border-wavs-border pb-6 mb-6";
 
 export const topbarNav =
   "flex gap-2 rounded-xl border border-wavs-border bg-white/75 p-1 shadow-topbar";
