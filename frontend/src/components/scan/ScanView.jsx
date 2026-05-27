@@ -35,7 +35,7 @@ export default function ScanView({
   targetUrl,
 }) {
   const optionBase =
-    "w-full rounded-xl border border-wavs-border bg-green=500 p-4 text-left transition hover:border-wavs-accent/40 disabled:cursor-not-allowed disabled:opacity-50";
+    "w-full rounded-xl border border-wavs-border bg-white p-4 text-left transition hover:border-wavs-accent/40 disabled:cursor-not-allowed disabled:opacity-50";
   const optionActive = "border-wavs-accent bg-wavs-accent/5 ring-1 ring-wavs-accent/20";
 
   return (
