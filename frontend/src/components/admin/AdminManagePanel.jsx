@@ -16,8 +16,9 @@ import RiskStrip from "../common/RiskStrip";
 import AdminPagination from "./AdminPagination";
 
 const historyItemBase =
-  "w-full rounded-xl border border-wavs-border bg-white p-4 text-left transition hover:border-wavs-accent/30";
-const historyItemActive = "border-wavs-accent bg-wavs-accent/5 ring-1 ring-wavs-accent/20";
+  "w-full rounded-xl border border-wavs-border bg-wavs-soft p-4 text-left transition hover:border-wavs-accent/40 hover:bg-[#eef7f0]";
+const historyItemActive =
+  "border-wavs-accent bg-[#e8f4ed] ring-2 ring-wavs-accent/25 shadow-[0_12px_28px_rgba(20,108,67,0.14)]";
 
 export default function AdminManagePanel({
   users,
@@ -77,7 +78,7 @@ export default function AdminManagePanel({
           <table className="w-full min-w-[720px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-wavs-border text-wavs-muted">
-                <th className="pb-3 pr-4 font-medium">Name</th>
+                <th className="pb-3 pr-4 font-medium pl-3">Name</th>
                 <th className="pb-3 pr-4 font-medium">Email</th>
                 <th className="pb-3 pr-4 font-medium">Scans</th>
                 <th className="pb-3 pr-4 font-medium">Joined</th>
@@ -92,11 +93,13 @@ export default function AdminManagePanel({
                   <tr
                     key={user.id}
                     className={`cursor-pointer border-b border-wavs-border/70 transition last:border-0 ${
-                      isSelected ? "bg-wavs-accent/5" : "hover:bg-wavs-soft"
+                      isSelected
+                        ? "bg-[#e8f4ed] shadow-[inset_4px_0_0_#146c43]"
+                        : "hover:bg-wavs-soft"
                     }`}
                     onClick={() => onSelectUser(String(user.id))}
                   >
-                    <td className="py-3 pr-4">{user.full_name}</td>
+                    <td className="py-3 pr-4 pl-3">{user.full_name}</td>
                     <td className="py-3 pr-4">{user.email}</td>
                     <td className="py-3 pr-4">{user.scan_count}</td>
                     <td className="py-3 pr-4 text-wavs-muted">{formatDate(user.created_at)}</td>

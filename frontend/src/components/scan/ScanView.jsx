@@ -35,8 +35,9 @@ export default function ScanView({
   targetUrl,
 }) {
   const optionBase =
-    "w-full rounded-xl border border-wavs-border bg-white p-4 text-left transition hover:border-wavs-accent/40 disabled:cursor-not-allowed disabled:opacity-50";
-  const optionActive = "border-wavs-accent bg-wavs-accent/5 ring-1 ring-wavs-accent/20";
+    "w-full rounded-xl border border-wavs-border bg-wavs-soft p-4 text-left transition hover:border-wavs-accent/40 hover:bg-[#eef7f0] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-wavs-soft";
+  const optionActive =
+    "border-wavs-accent bg-[#e8f4ed] ring-2 ring-wavs-accent/25 shadow-[0_12px_28px_rgba(20,108,67,0.14)]";
 
   return (
     <div className="space-y-6">

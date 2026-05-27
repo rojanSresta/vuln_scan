@@ -41,7 +41,10 @@ export default function AdminOverview({ stats, onOpenScan }) {
             </thead>
             <tbody>
               {(stats.recent_scans || []).map((scan) => (
-                <tr key={scan.scan_id} className="border-b border-wavs-border/70 last:border-0">
+                <tr
+                  key={scan.scan_id}
+                  className="border-b border-wavs-border/70 bg-wavs-soft/70 transition last:border-0 hover:bg-[#eef7f0]"
+                >
                   <td className="py-3 pr-4 align-top">
                     <button type="button" className={textLink} onClick={() => onOpenScan(scan)}>
                       {safeHostname(scan.target_url)}
