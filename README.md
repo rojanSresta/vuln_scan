@@ -30,6 +30,9 @@ Default admin (created on first startup):
 - Email: `admin@wavs.local`
 - Password: `admin12345`
 
+For production, edit `.env` before the first startup and replace the database
+password, admin password, public API URL, and CORS origins.
+
 Stop the stack:
 
 ```bash
@@ -141,14 +144,21 @@ History:
 
 ## Configuration
 
-Environment variables are documented in `.env.example`. For Docker, copy it to `.env` and adjust values before `docker compose up`.
+Environment variables are split by runtime:
+
+- Root `.env.example` is for Docker Compose only, because Compose automatically reads `.env` from the project root.
+- `backend/.env.example` is for manual backend runs.
+- `frontend/.env.example` is for manual React runs and production frontend builds.
 
 | Variable | Purpose |
 |----------|---------|
+| `APP_ENV` | Runtime profile label for local or production deployment tooling |
+| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | Docker Postgres database, user, and password |
 | `REACT_APP_API_URL` | API URL baked into the frontend build (use the host URL the browser will call) |
+| `REACT_APP_TOKEN_KEY` / `REACT_APP_ADMIN_TOKEN_KEY` | Browser localStorage keys for user and admin sessions |
 | `DATABASE_URL` | SQLAlchemy connection string for the backend |
 | `CORS_ORIGINS` | Comma-separated browser origins allowed by the API |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Default admin account seeded on startup |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_FULL_NAME` | Default admin account seeded on startup |
 
 ## Notes
 

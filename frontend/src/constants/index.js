@@ -1,6 +1,6 @@
 export const API = process.env.REACT_APP_API_URL || "http://localhost:8000";
-export const TOKEN_KEY = process.env.TOKEN_KEY || "wavs_token";
-export const ADMIN_TOKEN_KEY = process.env.ADMIN_TOKEN_KEY || "wavs_admin_token";
+export const TOKEN_KEY = process.env.REACT_APP_TOKEN_KEY || "wavs_token";
+export const ADMIN_TOKEN_KEY = process.env.REACT_APP_ADMIN_TOKEN_KEY || "wavs_admin_token";
 
 export const VULN_OPTIONS = [
   { id: "sql_injection", label: "SQL Injection", desc: "Detect query manipulation attempts" },
