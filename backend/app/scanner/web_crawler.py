@@ -34,7 +34,7 @@ class WebCrawler:
 
             visited.add(normalized)
             if progress_callback:
-                progress_callback(min(35, 5 + len(pages) * 3), "Scanning...")
+                progress_callback(min(35, 5 + len(pages) * 3), f"Crawling {normalized}...")
 
             try:
                 response = self.client.get(current)

@@ -13,6 +13,14 @@ from app.scanner.sql_check import SqlInjectionCheck
 from app.scanner.web_crawler import WebCrawler
 from app.scanner.xss_check import XssCheck
 
+CHECK_LABELS = {
+    "sql_injection": "Testing for SQL injection...",
+    "xss": "Testing for cross-site scripting...",
+    "dir_traversal": "Testing for directory traversal...",
+    "missing_headers": "Checking security headers...",
+    "default_credentials": "Testing default credentials...",
+}
+
 
 class ScanEngine:
     def __init__(self, cancel_callback=None):
@@ -34,7 +42,7 @@ class ScanEngine:
     ) -> list[dict[str, Any]]:
         effective = self._resolve_vulnerabilities(vulnerabilities)
         if progress_callback:
-            progress_callback(2, "Scanning...")
+            progress_callback(2, "Preparing scanner...")
 
         context = self.crawler.crawl(target_url, progress_callback=progress_callback)
         if not context.pages:
@@ -47,13 +55,13 @@ class ScanEngine:
             check = self.checks[category]
             if progress_callback:
                 pct = 35 + int(((index - 1) / total) * 55)
-                progress_callback(pct, "Scanning...")
+                progress_callback(pct, CHECK_LABELS.get(category, "Performing vulnerability checks..."))
             findings.extend(check.scan(context))
 
         ordered = sorted(findings, key=lambda item: (-RISK_CODES[item.risk], item.name))
         deduped = self._dedupe(ordered)
         if progress_callback:
-            progress_callback(97, "Scanning...")
+            progress_callback(97, "Generating report...")
         return [finding.to_dict() for finding in deduped]
 
     def _resolve_vulnerabilities(self, vulnerabilities: Sequence[str]) -> list[str]:

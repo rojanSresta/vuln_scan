@@ -31,6 +31,7 @@ export default function ScanView({
   riskStats,
   scanAll,
   scanId,
+  scanMessage,
   selected,
   targetUrl,
 }) {
@@ -106,7 +107,10 @@ export default function ScanView({
       {phase === "scanning" && (
         <section className={card}>
           <div className={`${sectionHead} !mb-3`}>
-            <h2 className={sectionTitle}>Scanning</h2>
+            <div className="min-w-0">
+              <h2 className={sectionTitle}>Scanning</h2>
+              <p className={`${sectionDesc} break-all`}>{scanMessage || "Preparing scanner..."}</p>
+            </div>
             <strong className="text-lg font-semibold text-wavs-accent">{progress}%</strong>
           </div>
           <div className="h-2.5 overflow-hidden rounded-full bg-wavs-border">

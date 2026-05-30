@@ -99,12 +99,12 @@ class ScanService:
 
             engine = ScanEngine(cancel_callback=ensure_not_cancelled)
             ensure_not_cancelled()
-            self._update_record(scan_id, status="scanning", progress=2, message="Scanning...")
+            self._update_record(scan_id, status="scanning", progress=2, message="Preparing scanner...")
             logger.info("[%s] Manual scan start -> %s", scan_id, target_url)
 
-            def on_progress(progress: int, _message: str) -> None:
+            def on_progress(progress: int, message: str) -> None:
                 ensure_not_cancelled()
-                self._update_record(scan_id, status="scanning", progress=progress, message="Scanning...")
+                self._update_record(scan_id, status="scanning", progress=progress, message=message)
 
             results = engine.run(
                 target_url=target_url,

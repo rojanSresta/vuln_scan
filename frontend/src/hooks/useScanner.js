@@ -13,6 +13,7 @@ export function useScanner(token) {
   const [phase, setPhase] = useState("idle");
   const [scanId, setScanId] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [scanMessage, setScanMessage] = useState("");
   const [results, setResults] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [expandedRows, setExpandedRows] = useState({});
@@ -31,6 +32,7 @@ export function useScanner(token) {
     setPhase("idle");
     setScanId(null);
     setProgress(0);
+    setScanMessage("");
     setResults([]);
     setErrorMsg("");
     setExpandedRows({});
@@ -44,6 +46,7 @@ export function useScanner(token) {
       const response = await apiFetch(`/scan/cancel/${scanId}`, { method: "POST", token });
       const payload = await response.json();
       setProgress(payload.progress ?? 0);
+      setScanMessage(payload.message || "");
       setPhase("cancelled");
       setResults([]);
       await loadHistory(scanId);
@@ -108,6 +111,7 @@ export function useScanner(token) {
       const statusResponse = await apiFetch(`/scan/status/${id}`, { method: "GET", token });
       const statusData = await statusResponse.json();
       setProgress(statusData.progress);
+      setScanMessage(statusData.message || "");
 
       if (statusData.status === "done") {
         stopPolling();
@@ -138,6 +142,7 @@ export function useScanner(token) {
   const startScan = async () => {
     setPhase("scanning");
     setProgress(0);
+    setScanMessage("Preparing scanner...");
     setResults([]);
     setErrorMsg("");
     setExpandedRows({});
@@ -213,6 +218,7 @@ export function useScanner(token) {
     results,
     resultsRef,
     riskStats,
+    scanMessage,
     scanAll,
     scanId,
     selected,

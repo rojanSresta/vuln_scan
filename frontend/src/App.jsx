@@ -112,6 +112,7 @@ export default function App() {
             riskStats={scanner.riskStats}
             scanAll={scanner.scanAll}
             scanId={scanner.scanId}
+            scanMessage={scanner.scanMessage}
             selected={scanner.selected}
             targetUrl={scanner.targetUrl}
           />
