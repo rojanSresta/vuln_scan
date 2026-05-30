@@ -30,6 +30,9 @@ Default admin (created on first startup):
 - Email: `admin@wavs.local`
 - Password: `admin12345`
 
+For production, edit `.env` before the first startup and replace the database
+password, admin password, public API URL, and CORS origins.
+
 Stop the stack:
 
 ```bash
@@ -81,22 +84,41 @@ bash run_frontend.sh
 
 The React dev server runs on http://localhost:3000.
 
-## Project Layout
+## Project Layout (OOP)
 
 ```text
-wavs-new/
-├── backend/
-│   ├── Dockerfile
-│   ├── main.py
-│   └── requirements.txt
-├── frontend/
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   └── package.json
+vuln_scan/
+├── backend/app/
+│   ├── main.py                 # App entry
+│   ├── config.py               # Settings
+│   ├── security.py             # PasswordHasher, TokenFactory
+│   ├── router.py               # Registers controllers
+│   ├── controllers/            # HTTP layer (classes)
+│   │   ├── auth_controller.py
+│   │   ├── scan_controller.py
+│   │   ├── history_controller.py
+│   │   └── admin_controller.py
+│   ├── services/               # Business logic (classes)
+│   │   ├── auth_service.py
+│   │   ├── scan_service.py
+│   │   ├── history_service.py
+│   │   ├── admin_service.py
+│   │   └── report_service.py
+│   ├── scanner/                # Vulnerability engine (classes)
+│   │   ├── scan_engine.py
+│   │   ├── sql_check.py, xss_check.py, path_check.py, ...
+│   │   └── payloads/
+│   ├── database/               # ORM models
+│   │   ├── models.py
+│   │   ├── connection.py
+│   │   └── setup.py
+│   └── schemas/                # Request/response models
+├── frontend/src/
+│   ├── components/             # UI (unchanged look)
+│   ├── hooks/
+│   └── services/api_client.js  # ApiClient class
 ├── docker-compose.yml
-├── .env.example
-├── run_backend.sh
-└── run_frontend.sh
+└── run_backend.sh / run_frontend.sh
 ```
 
 ## Main API Endpoints
@@ -122,14 +144,21 @@ History:
 
 ## Configuration
 
-Environment variables are documented in `.env.example`. For Docker, copy it to `.env` and adjust values before `docker compose up`.
+Environment variables are split by runtime:
+
+- Root `.env.example` is for Docker Compose only, because Compose automatically reads `.env` from the project root.
+- `backend/.env.example` is for manual backend runs.
+- `frontend/.env.example` is for manual React runs and production frontend builds.
 
 | Variable | Purpose |
 |----------|---------|
+| `APP_ENV` | Runtime profile label for local or production deployment tooling |
+| `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` | Docker Postgres database, user, and password |
 | `REACT_APP_API_URL` | API URL baked into the frontend build (use the host URL the browser will call) |
+| `REACT_APP_TOKEN_KEY` / `REACT_APP_ADMIN_TOKEN_KEY` | Browser localStorage keys for user and admin sessions |
 | `DATABASE_URL` | SQLAlchemy connection string for the backend |
 | `CORS_ORIGINS` | Comma-separated browser origins allowed by the API |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Default admin account seeded on startup |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_FULL_NAME` | Default admin account seeded on startup |
 
 ## Notes
 

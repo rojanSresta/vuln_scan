@@ -1,7 +1,21 @@
 import React from "react";
 import { formatDate, safeHostname } from "../../utils/format";
+import { statusBadgeClass } from "../../utils/status";
+import {
+  btnSecondary,
+  card,
+  muted,
+  sectionDesc,
+  sectionHead,
+  sectionTitle,
+} from "../../ui/classes";
 import ResultsTable from "../common/ResultsTable";
 import RiskStrip from "../common/RiskStrip";
+
+const historyItemBase =
+  "w-full rounded-xl border border-wavs-border bg-wavs-soft p-4 text-left transition hover:border-wavs-accent/40 hover:bg-[#eef7f0]";
+const historyItemActive =
+  "border-wavs-accent bg-[#e8f4ed] ring-2 ring-wavs-accent/25 shadow-[0_12px_28px_rgba(20,108,67,0.14)]";
 
 export default function HistoryView({
   downloadReport,
@@ -13,60 +27,79 @@ export default function HistoryView({
   selectedHistory,
 }) {
   return (
-    <div className="history-grid">
-      <section className="simple-card">
-        <div className="section-head">
+    <div className="grid gap-6 lg:grid-cols-2">
+      <section className={card}>
+        <div className={sectionHead}>
           <div>
-            <h2>History</h2>
-            <p>Open any previous scan to view details or download the report again.</p>
+            <h2 className={sectionTitle}>History</h2>
+            <p className={sectionDesc}>Open any previous scan to view details or download the report again.</p>
           </div>
         </div>
 
-        <div className="history-list">
-          {historyLoading && <p className="muted">Loading history...</p>}
-          {!historyLoading && history.length === 0 && <p className="muted">No scan history yet.</p>}
+        <div className="space-y-3">
+          {historyLoading && <p className={muted}>Loading history...</p>}
+          {!historyLoading && history.length === 0 && <p className={muted}>No scan history yet.</p>}
           {history.map((item) => (
             <button
               key={item.scan_id}
-              className={`history-item ${selectedHistory?.scan_id === item.scan_id ? "active" : ""}`}
+              type="button"
+              className={`${historyItemBase} ${
+                selectedHistory?.scan_id === item.scan_id ? historyItemActive : ""
+              }`}
               onClick={() => onHistoryOpen(item)}
             >
               <div>
-                <strong>{safeHostname(item.target_url)}</strong>
-                <span>{item.target_url}</span>
+                <strong className="block text-wavs-text">{safeHostname(item.target_url)}</strong>
+                <span className="mt-1 block break-all text-sm text-wavs-muted">{item.target_url}</span>
               </div>
-              <div className="history-meta">
-                <span>{formatDate(item.created_at)}</span>
-                <span className={`status-badge status-${item.status}`}>{item.status}</span>
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm">
+                <span className="text-wavs-muted">{formatDate(item.created_at)}</span>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusBadgeClass(item.status)}`}
+                >
+                  {item.status}
+                </span>
               </div>
             </button>
           ))}
         </div>
       </section>
 
-      <section className="simple-card">
+      <section className={card}>
         {selectedHistory ? (
           <>
-            <div className="section-head">
+            <div className={sectionHead}>
               <div>
-                <h2>Scan detail</h2>
-                <p>{selectedHistory.target_url}</p>
+                <h2 className={sectionTitle}>Scan detail</h2>
+                <p className={`${sectionDesc} break-all`}>{selectedHistory.target_url}</p>
               </div>
               {selectedHistory.report_available && (
-                <button className="button button-secondary" onClick={() => downloadReport(selectedHistory.scan_id)}>
+                <button
+                  type="button"
+                  className={btnSecondary}
+                  onClick={() => downloadReport(selectedHistory.scan_id)}
+                >
                   Download Again
                 </button>
               )}
             </div>
 
-            <div className="detail-grid">
-              <div className="stat-box">
-                <span>Scan ID</span>
-                <strong>{selectedHistory.scan_id}</strong>
+            <div className="mb-5 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-wavs-border bg-wavs-soft p-4">
+                <span className="block text-xs font-medium uppercase tracking-wide text-wavs-muted">
+                  Scan ID
+                </span>
+                <strong className="mt-1 block break-all text-sm text-wavs-text">
+                  {selectedHistory.scan_id}
+                </strong>
               </div>
-              <div className="stat-box">
-                <span>Checks</span>
-                <strong>{(selectedHistory.vulnerabilities || []).join(", ") || "Not available"}</strong>
+              <div className="rounded-xl border border-wavs-border bg-wavs-soft p-4">
+                <span className="block text-xs font-medium uppercase tracking-wide text-wavs-muted">
+                  Checks
+                </span>
+                <strong className="mt-1 block text-sm text-wavs-text">
+                  {(selectedHistory.vulnerabilities || []).join(", ") || "Not available"}
+                </strong>
               </div>
             </div>
 
@@ -74,7 +107,7 @@ export default function HistoryView({
             <ResultsTable items={historyResults} expandedRows={{}} onToggleRow={() => {}} readOnly />
           </>
         ) : (
-          <p className="muted">Choose a saved scan to inspect its details.</p>
+          <p className={muted}>Choose a saved scan to inspect its details.</p>
         )}
       </section>
     </div>

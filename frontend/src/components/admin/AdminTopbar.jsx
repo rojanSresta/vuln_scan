@@ -1,34 +1,48 @@
 import React from "react";
+import {
+  brand,
+  btnSecondary,
+  sectionDesc,
+  topbar,
+  topbarNav,
+  navPill,
+  navPillActive,
+} from "../../ui/classes";
 
 export default function AdminTopbar({ user, view, onViewChange, onLogout, onRefresh, loading }) {
   return (
-    <header className="topbar admin-topbar">
+    <header className={topbar}>
       <div>
-        <div className="brand">WAVS Admin</div>
-        <p className="topbar-subtitle">System monitoring and user management</p>
+        <div className={brand}>WAVS Admin</div>
+        <p className={sectionDesc}>System monitoring and user management</p>
       </div>
 
-      <nav className="topbar-nav">
-        <button className={view === "overview" ? "active" : ""} onClick={() => onViewChange("overview")}>
+      <nav className={topbarNav}>
+        <button
+          type="button"
+          className={view === "overview" ? navPillActive : navPill}
+          onClick={() => onViewChange("overview")}
+        >
           Overview
         </button>
-        <button className={view === "users" ? "active" : ""} onClick={() => onViewChange("users")}>
-          Users
-        </button>
-        <button className={view === "scans" ? "active" : ""} onClick={() => onViewChange("scans")}>
-          Scan records
+        <button
+          type="button"
+          className={view === "manage" ? navPillActive : navPill}
+          onClick={() => onViewChange("manage")}
+        >
+          Users & scans
         </button>
       </nav>
 
-      <div className="topbar-user">
-        <div>
-          <strong>{user.full_name}</strong>
-          <span>{user.email}</span>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="text-right text-sm">
+          <strong className="block text-wavs-text">{user.full_name}</strong>
+          <span className="text-wavs-muted">{user.email}</span>
         </div>
-        <button className="button button-secondary" onClick={onRefresh} disabled={loading}>
+        <button type="button" className={btnSecondary} onClick={onRefresh} disabled={loading}>
           Refresh
         </button>
-        <button className="button button-secondary" onClick={onLogout}>
+        <button type="button" className={btnSecondary} onClick={onLogout}>
           Logout
         </button>
       </div>

@@ -2,14 +2,18 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json postcss.config.js tailwind.config.js ./
 RUN npm ci
 
 COPY public ./public
 COPY src ./src
 
 ARG REACT_APP_API_URL=http://localhost:8000
+ARG REACT_APP_TOKEN_KEY=wavs_token
+ARG REACT_APP_ADMIN_TOKEN_KEY=wavs_admin_token
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_TOKEN_KEY=$REACT_APP_TOKEN_KEY
+ENV REACT_APP_ADMIN_TOKEN_KEY=$REACT_APP_ADMIN_TOKEN_KEY
 
 RUN npm run build
 
@@ -19,6 +23,3 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
-
-HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=5 \
-    CMD wget -qO- http://localhost/ || exit 1

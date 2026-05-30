@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "../services/api";
+import { buildRiskStats } from "../utils/risk";
 
 export function useScanner(token) {
   const [view, setView] = useState("scan");
@@ -12,7 +13,7 @@ export function useScanner(token) {
   const [phase, setPhase] = useState("idle");
   const [scanId, setScanId] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [statusMsg, setStatusMsg] = useState("");
+  const [scanMessage, setScanMessage] = useState("");
   const [results, setResults] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [expandedRows, setExpandedRows] = useState({});
@@ -31,7 +32,7 @@ export function useScanner(token) {
     setPhase("idle");
     setScanId(null);
     setProgress(0);
-    setStatusMsg("");
+    setScanMessage("");
     setResults([]);
     setErrorMsg("");
     setExpandedRows({});
@@ -41,13 +42,11 @@ export function useScanner(token) {
     if (!scanId || phase !== "scanning") return;
 
     stopPolling();
-    setStatusMsg("Cancelling scan...");
-
     try {
       const response = await apiFetch(`/scan/cancel/${scanId}`, { method: "POST", token });
       const payload = await response.json();
       setProgress(payload.progress ?? 0);
-      setStatusMsg(payload.message || "Scan cancelled.");
+      setScanMessage(payload.message || "");
       setPhase("cancelled");
       setResults([]);
       await loadHistory(scanId);
@@ -112,7 +111,7 @@ export function useScanner(token) {
       const statusResponse = await apiFetch(`/scan/status/${id}`, { method: "GET", token });
       const statusData = await statusResponse.json();
       setProgress(statusData.progress);
-      setStatusMsg(statusData.message);
+      setScanMessage(statusData.message || "");
 
       if (statusData.status === "done") {
         stopPolling();
@@ -143,7 +142,7 @@ export function useScanner(token) {
   const startScan = async () => {
     setPhase("scanning");
     setProgress(0);
-    setStatusMsg("Preparing scanner...");
+    setScanMessage("Preparing scanner...");
     setResults([]);
     setErrorMsg("");
     setExpandedRows({});
@@ -197,16 +196,9 @@ export function useScanner(token) {
 
   const canStart = /^https?:\/\/.+/.test(targetUrl.trim()) && (scanAll || selected.length > 0);
 
-  const riskStats = results.reduce((acc, item) => {
-    acc[item.risk] = (acc[item.risk] || 0) + 1;
-    return acc;
-  }, {});
-
+  const riskStats = buildRiskStats(results);
   const historyResults = selectedHistory?.results || [];
-  const historyRiskStats = historyResults.reduce((acc, item) => {
-    acc[item.risk] = (acc[item.risk] || 0) + 1;
-    return acc;
-  }, {});
+  const historyRiskStats = buildRiskStats(historyResults);
 
   return {
     canStart,
@@ -226,6 +218,7 @@ export function useScanner(token) {
     results,
     resultsRef,
     riskStats,
+    scanMessage,
     scanAll,
     scanId,
     selected,
@@ -236,7 +229,6 @@ export function useScanner(token) {
     setTargetUrl,
     setView,
     startScan,
-    statusMsg,
     targetUrl,
     toggleScanAll,
     toggleVuln,

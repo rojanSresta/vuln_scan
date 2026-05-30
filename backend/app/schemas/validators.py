@@ -7,6 +7,7 @@ from typing import Annotated
 
 from pydantic import BeforeValidator
 
+# Allows local/dev addresses such as admin@wavs.local (EmailStr rejects .local TLDs).
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 

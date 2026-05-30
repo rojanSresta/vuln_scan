@@ -10,12 +10,7 @@ import { useAdminPanel } from "./hooks/useAdminPanel";
 import { useAuth } from "./hooks/useAuth";
 import { useScanner } from "./hooks/useScanner";
 import { useAdminRoute } from "./utils/navigation";
-import "./styles/app.css";
-import "./styles/auth.css";
-import "./styles/history.css";
-import "./styles/results.css";
-import "./styles/scan.css";
-import "./styles/admin.css";
+import { alertError, page, shell } from "./ui/classes";
 
 export default function App() {
   const { onAdminRoute, isAdminLoginPath, goToAdminHome, goToAdminLogin } = useAdminRoute();
@@ -47,11 +42,10 @@ export default function App() {
   };
 
   const handleAdminLogin = async () => {
-    const ok = await admin.login();
-    if (!ok) return;
+    const result = await admin.login();
+    if (!result.ok) return;
     goToAdminHome();
-    adminPanel.setView("overview");
-    await adminPanel.refresh();
+    // Panel loads stats after admin.token updates (do not call refresh here — token is still stale).
   };
 
   const handleAdminLogout = async () => {
@@ -92,11 +86,11 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={shell}>
       <Topbar user={auth.user} view={scanner.view} onViewChange={scanner.setView} onLogout={handleLogout} />
 
-      <main className="page">
-        {scanner.errorMsg && <div className="alert error">Action failed: {scanner.errorMsg}</div>}
+      <main className={page}>
+        {scanner.errorMsg && <div className={alertError}>Action failed: {scanner.errorMsg}</div>}
 
         {scanner.view === "scan" && (
           <ScanView
@@ -104,9 +98,6 @@ export default function App() {
             cancelScan={scanner.cancelScan}
             downloadReport={scanner.downloadReport}
             expandedRows={scanner.expandedRows}
-            history={scanner.history}
-            historyLoading={scanner.historyLoading}
-            onHistoryOpen={scanner.openHistoryItem}
             onRowToggle={(index) =>
               scanner.setExpandedRows((current) => ({ ...current, [index]: !current[index] }))
             }
@@ -121,8 +112,8 @@ export default function App() {
             riskStats={scanner.riskStats}
             scanAll={scanner.scanAll}
             scanId={scanner.scanId}
+            scanMessage={scanner.scanMessage}
             selected={scanner.selected}
-            statusMsg={scanner.statusMsg}
             targetUrl={scanner.targetUrl}
           />
         )}

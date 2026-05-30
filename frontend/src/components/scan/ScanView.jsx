@@ -1,6 +1,16 @@
 import React from "react";
 import { VULN_OPTIONS } from "../../constants";
-import { formatDate, safeHostname } from "../../utils/format";
+import {
+  btnPrimary,
+  btnSecondary,
+  card,
+  field,
+  fieldLabel,
+  input,
+  sectionDesc,
+  sectionHead,
+  sectionTitle,
+} from "../../ui/classes";
 import ResultsTable from "../common/ResultsTable";
 import RiskStrip from "../common/RiskStrip";
 
@@ -9,9 +19,6 @@ export default function ScanView({
   cancelScan,
   downloadReport,
   expandedRows,
-  history,
-  historyLoading,
-  onHistoryOpen,
   onRowToggle,
   onScanAllToggle,
   onStartScan,
@@ -24,23 +31,29 @@ export default function ScanView({
   riskStats,
   scanAll,
   scanId,
+  scanMessage,
   selected,
-  statusMsg,
   targetUrl,
 }) {
+  const optionBase =
+    "w-full rounded-xl border border-wavs-border bg-wavs-soft p-4 text-left transition hover:border-wavs-accent/40 hover:bg-[#eef7f0] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-wavs-soft";
+  const optionActive =
+    "border-wavs-accent bg-[#e8f4ed] ring-2 ring-wavs-accent/25 shadow-[0_12px_28px_rgba(20,108,67,0.14)]";
+
   return (
-    <div className="content-grid">
-      <section className="simple-card">
-        <div className="section-head">
+    <div className="space-y-6">
+      <section className={card}>
+        <div className={sectionHead}>
           <div>
-            <h2>Start a new scan</h2>
-            <p>Select a target and the checks you want to run.</p>
+            <h2 className={sectionTitle}>Start a new scan</h2>
+            <p className={sectionDesc}>Select a target and the checks you want to run.</p>
           </div>
         </div>
 
-        <label className="field">
-          <span>Target URL</span>
+        <label className={field}>
+          <span className={fieldLabel}>Target URL</span>
           <input
+            className={input}
             type="text"
             value={targetUrl}
             onChange={(event) => onTargetUrlChange(event.target.value)}
@@ -49,99 +62,81 @@ export default function ScanView({
           />
         </label>
 
-        <div className="option-list">
+        <div className="mb-5 grid gap-3 sm:grid-cols-2">
           <button
-            className={`option-item ${scanAll ? "active" : ""}`}
+            type="button"
+            className={`${optionBase} ${scanAll ? optionActive : ""}`}
             onClick={onScanAllToggle}
             disabled={phase === "scanning"}
           >
-            <strong>Scan All</strong>
-            <span>Run every available check</span>
+            <strong className="block text-wavs-text">Scan All</strong>
+            <span className="mt-1 block text-sm text-wavs-muted">Run every available check</span>
           </button>
 
           {VULN_OPTIONS.map((item) => (
             <button
               key={item.id}
-              className={`option-item ${selected.includes(item.id) && !scanAll ? "active" : ""}`}
+              type="button"
+              className={`${optionBase} ${selected.includes(item.id) && !scanAll ? optionActive : ""}`}
               onClick={() => !scanAll && onVulnToggle(item.id)}
               disabled={phase === "scanning" || scanAll}
             >
-              <strong>{item.label}</strong>
-              <span>{item.desc}</span>
+              <strong className="block text-wavs-text">{item.label}</strong>
+              <span className="mt-1 block text-sm text-wavs-muted">{item.desc}</span>
             </button>
           ))}
         </div>
 
-        <div className="actions">
-          <button className="button button-primary" disabled={!canStart || phase === "scanning"} onClick={onStartScan}>
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            className={btnPrimary}
+            disabled={!canStart || phase === "scanning"}
+            onClick={onStartScan}
+          >
             {phase === "scanning" ? "Scanning..." : "Start Scan"}
           </button>
           {phase === "scanning" && (
-            <button className="button button-secondary" onClick={cancelScan}>
+            <button type="button" className={btnSecondary} onClick={cancelScan}>
               Cancel
             </button>
           )}
         </div>
       </section>
 
-      <aside className="simple-card side-card">
-        <h3>Quick Info</h3>
-        <div className="stats">
-          <div className="stat-box">
-            <span>Saved scans</span>
-            <strong>{history.length}</strong>
-          </div>
-          <div className="stat-box">
-            <span>Completed</span>
-            <strong>{history.filter((item) => item.status === "done").length}</strong>
-          </div>
-        </div>
-
-        <div className="mini-list">
-          <h4>Recent reports</h4>
-          {historyLoading && <p className="muted">Loading history...</p>}
-          {!historyLoading && history.length === 0 && <p className="muted">No saved reports yet.</p>}
-          {history.slice(0, 4).map((item) => (
-            <button key={item.scan_id} className="mini-item" onClick={() => onHistoryOpen(item)}>
-              <strong>{safeHostname(item.target_url)}</strong>
-              <span>{formatDate(item.created_at)}</span>
-            </button>
-          ))}
-        </div>
-      </aside>
-
       {phase === "scanning" && (
-        <section className="simple-card full-width">
-          <div className="section-head">
-            <div>
-              <h2>Scan progress</h2>
-              <p>{statusMsg}</p>
+        <section className={card}>
+          <div className={`${sectionHead} !mb-3`}>
+            <div className="min-w-0">
+              <h2 className={sectionTitle}>Scanning</h2>
+              <p className={`${sectionDesc} break-all`}>{scanMessage || "Preparing scanner..."}</p>
             </div>
-            <strong className="progress-label">{progress}%</strong>
+            <strong className="text-lg font-semibold text-wavs-accent">{progress}%</strong>
           </div>
-
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          <div className="h-2.5 overflow-hidden rounded-full bg-wavs-border">
+            <div
+              className="h-full rounded-full bg-wavs-accent transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </section>
       )}
 
       {phase === "done" && (
-        <section ref={resultsRef} className="simple-card full-width">
-          <div className="section-head">
+        <section ref={resultsRef} className={card}>
+          <div className={sectionHead}>
             <div>
-              <h2>Scan results</h2>
-              <p>{results.length} finding(s) were recorded for this run.</p>
+              <h2 className={sectionTitle}>Scan results</h2>
+              <p className={sectionDesc}>{results.length} finding(s) were recorded for this run.</p>
             </div>
             {scanId && (
-              <button className="button button-secondary" onClick={() => downloadReport(scanId)}>
+              <button type="button" className={btnSecondary} onClick={() => downloadReport(scanId)}>
                 Download PDF
               </button>
             )}
           </div>
 
           <RiskStrip stats={riskStats} />
-
           <ResultsTable items={results} expandedRows={expandedRows} onToggleRow={onRowToggle} />
         </section>
       )}
