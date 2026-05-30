@@ -204,7 +204,7 @@ def _build_story(styles: dict[str, ParagraphStyle], scan_id: str, target_url: st
                 ParagraphStyle("badge", alignment=TA_CENTER, fontSize=10),
             ),
         ]]
-        title_table = Table(title_data, colWidths=[13 * cm, 4 * cm])
+        title_table = Table(title_data, colWidths=[12.8 * cm, 3.8 * cm])
         title_table.setStyle(
             TableStyle(
                 [
