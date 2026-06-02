@@ -51,7 +51,7 @@ export default function ScanView({
         </div>
 
         <label className={field}>
-          <span className={fieldLabel}>Target URL</span>
+          <span className={fieldLabel}>Enter full URL (must start with https://)</span>
           <input
             className={input}
             type="text"
