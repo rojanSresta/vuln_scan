@@ -12,7 +12,7 @@ from app.scanner.scan_types import CrawlContext, TRAVERSAL_SUCCESS_PATTERNS, Vul
 
 class PathTraversalCheck(VulnerabilityCheck):
     category = "dir_traversal"
-    candidate_keywords = ("file", "path", "page", "template", "folder", "doc", "document", "download", "image")
+    candidate_keywords = ("file", "path", "page", "template", "folder", "doc", "document", "download", "image", "id", "pid", "dir", "dir_path", "catalog", "category", "section", "item", "file_id", "resource", "asset")
 
     def __init__(self, client):
         super().__init__(client)
