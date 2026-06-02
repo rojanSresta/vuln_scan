@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from urllib.parse import urlparse
+from uuid import uuid4
 
 from app.scanner.check_base import VulnerabilityCheck
 from app.scanner.payload_loader import PayloadLoader
@@ -28,15 +28,19 @@ class PathTraversalCheck(VulnerabilityCheck):
                 if key in tested:
                     continue
                 tested.add(key)
+                baseline = self.probe_query(page.url, param, f"baseline-{uuid4().hex[:10]}")
+                baseline_body = baseline.text.lower() if baseline else ""
+                baseline_matches = any(re.search(pattern, baseline_body) for pattern in TRAVERSAL_SUCCESS_PATTERNS)
                 for payload in self.payloads:
                     response = self.probe_query(page.url, param, payload)
                     if not response:
                         continue
                     body = response.text.lower()
-                    if any(re.search(pattern, body) for pattern in TRAVERSAL_SUCCESS_PATTERNS):
+                    payload_matches = any(re.search(pattern, body) for pattern in TRAVERSAL_SUCCESS_PATTERNS)
+                    if payload_matches and not baseline_matches:
                         return [
                             VulnerabilityFinding(
-                                name="Path Traversal",
+                                name="Directory Traversal",
                                 risk="High",
                                 url=response.url,
                                 description="A file-oriented parameter accepted traversal payloads and returned sensitive file content.",

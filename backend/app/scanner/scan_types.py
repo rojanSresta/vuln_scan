@@ -23,24 +23,14 @@ DEFAULT_VULNERABILITIES = [
 
 SECURITY_HEADERS = (
     ("Strict-Transport-Security", "Medium", "HSTS"),
-    ("X-Content-Type-Options", "Low", "MIME sniffing protection"),
+    # ("X-Content-Type-Options", "Low", "MIME sniffing protection"),
     ("X-Frame-Options", "Medium", "clickjacking protection"),
     ("Content-Security-Policy", "Medium", "content security policy"),
-    ("Referrer-Policy", "Low", "referrer leakage control"),
-    ("Permissions-Policy", "Informational", "browser feature restrictions"),
+    # ("Referrer-Policy", "Low", "referrer leakage control"),
+    # ("Permissions-Policy", "Informational", "browser feature restrictions"),
 )
 
 RISK_CODES = {"High": 3, "Medium": 2, "Low": 1, "Informational": 0}
-SQL_ERROR_PATTERNS = [
-    r"sql syntax",
-    r"mysql",
-    r"postgresql",
-    r"sqlite",
-    r"odbc",
-    r"ora-\d+",
-    r"unclosed quotation mark",
-    r"syntax error near",
-]
 TRAVERSAL_SUCCESS_PATTERNS = [
     r"root:.*:0:0",
     r"\[extensions\]",

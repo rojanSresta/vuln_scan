@@ -2,15 +2,9 @@
 
 from __future__ import annotations
 
-import re
 from typing import Dict, Optional
 
-from app.scanner.scan_types import FormField, FormRecord, SQL_ERROR_PATTERNS
-
-
-def sql_error_detected(response) -> bool:
-    body = response.text.lower()
-    return response.status_code >= 500 or any(re.search(pattern, body) for pattern in SQL_ERROR_PATTERNS)
+from app.scanner.scan_types import FormField, FormRecord
 
 
 def form_submission(form: FormRecord, target_field: str, payload: str, default: str) -> Dict[str, str]:

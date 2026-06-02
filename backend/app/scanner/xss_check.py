@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import requests
 
 from app.scanner.check_base import VulnerabilityCheck
@@ -27,7 +28,7 @@ class XssCheck(VulnerabilityCheck):
             for param in page.query_params:
                 for payload in self.payloads:
                     response = self.probe_query(page.url, param, payload)
-                    if response and payload in response.text:
+                    if response and self._payload_reflected_in_non_script(payload, response.text):
                         return True
         return False
 
@@ -42,9 +43,20 @@ class XssCheck(VulnerabilityCheck):
                         response = self.submit_form(form, form_submission(form, field.name, payload, "test"))
                     except requests.RequestException:
                         continue
-                    if payload in response.text:
+                    if self._payload_reflected_in_non_script(payload, response.text):
                         return True
         return False
+
+    @staticmethod
+    def _payload_reflected_in_non_script(payload: str, html: str) -> bool:
+        payload_l = payload.lower()
+        html_l = html.lower()
+        if payload_l not in html_l:
+            return False
+
+        # Ignore matches only present inside <script> blocks to reduce false positives.
+        non_script = re.sub(r"<script\b[^>]*>.*?</script>", "", html_l, flags=re.I | re.S)
+        return payload_l in non_script
 
     def _make_finding(self, url: str) -> VulnerabilityFinding:
         return VulnerabilityFinding(

@@ -14,7 +14,7 @@ from app.scanner.web_crawler import WebCrawler
 from app.scanner.xss_check import XssCheck
 
 CHECK_LABELS = {
-    "sql_injection": "Testing for SQL injection...",
+    "sql_injection": "Testing for authentication bypass SQL injection...",
     "xss": "Testing for cross-site scripting...",
     "dir_traversal": "Testing for directory traversal...",
     "missing_headers": "Checking security headers...",
@@ -53,6 +53,7 @@ class ScanEngine:
 
         for index, category in enumerate(effective, start=1):
             check = self.checks[category]
+            check.set_scope_target(context.target_url)
             if progress_callback:
                 pct = 35 + int(((index - 1) / total) * 55)
                 progress_callback(pct, CHECK_LABELS.get(category, "Performing vulnerability checks..."))

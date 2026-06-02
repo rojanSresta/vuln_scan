@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Optional
+from uuid import uuid4
 
 import requests
 
@@ -41,6 +42,7 @@ class DefaultCredentialsCheck(VulnerabilityCheck):
                 if not fields:
                     continue
                 username_field, password_field = fields
+                baseline = self._baseline_attempt(form, username_field.name, password_field.name)
 
                 for username in self.usernames:
                     for password in self.passwords:
@@ -51,7 +53,7 @@ class DefaultCredentialsCheck(VulnerabilityCheck):
                             response = self.submit_form(form, submission)
                         except requests.RequestException:
                             continue
-                        if self._login_succeeded(response, form):
+                        if self._login_succeeded(response, baseline):
                             return [
                                 VulnerabilityFinding(
                                     name="Default Credentials Accepted",
@@ -99,25 +101,52 @@ class DefaultCredentialsCheck(VulnerabilityCheck):
         return username_field, password_field
 
     def _is_auth_form(self, form: FormRecord) -> bool:
-        if any(field.field_type == "password" for field in form.fields):
-            return True
+        has_password = any(field.field_type == "password" for field in form.fields)
+        if not has_password:
+            return False
         combined = f"{form.page_url} {form.action_url}".lower()
         return any(keyword in combined for keyword in LOGIN_KEYWORDS)
 
-    def _login_succeeded(self, response: requests.Response, form: FormRecord) -> bool:
+    def _baseline_attempt(self, form: FormRecord, username_field: str, password_field: str) -> requests.Response | None:
+        fake_user = f"nonexistent-{uuid4().hex[:10]}"
+        fake_pass = f"invalid-{uuid4().hex[:10]}"
+        submission = {field.name: field.value or "" for field in form.fields}
+        submission[username_field] = fake_user
+        submission[password_field] = fake_pass
+        try:
+            return self.submit_form(form, submission)
+        except requests.RequestException:
+            return None
+
+    def _response_signature(self, response: requests.Response) -> tuple[int, str, str]:
+        location = (response.headers.get("Location", "") or "").lower()
+        set_cookie = (response.headers.get("Set-Cookie", "") or "").lower()
+        return (response.status_code, location, set_cookie[:200])
+
+    def _login_succeeded(
+        self,
+        response: requests.Response,
+        baseline: requests.Response | None,
+    ) -> bool:
         body = response.text.lower()
         if any(hint in body for hint in FAILURE_HINTS):
             return False
 
         location = response.headers.get("Location", "").lower()
-        if response.status_code in {301, 302, 303, 307, 308}:
-            if location and not any(keyword in location for keyword in LOGIN_KEYWORDS):
-                return True
+        response_sig = self._response_signature(response)
+        baseline_sig = self._response_signature(baseline) if baseline else None
 
-        if any(hint in body for hint in SUCCESS_HINTS):
-            return True
+        has_success_hint = any(hint in body for hint in SUCCESS_HINTS) or any(hint in location for hint in SUCCESS_HINTS)
+        redirects_away_from_login = (
+            response.status_code in {301, 302, 303, 307, 308}
+            and bool(location)
+            and not any(keyword in location for keyword in LOGIN_KEYWORDS)
+        )
 
-        if response.status_code == 200 and "set-cookie" in {key.lower() for key in response.headers}:
-            if not any(keyword in form.action_url.lower() for keyword in LOGIN_KEYWORDS):
-                return True
-        return False
+        # Stronger rule to avoid false positives on public sites:
+        # require explicit success indicators and behavior that differs from clearly-invalid creds.
+        if not (has_success_hint or redirects_away_from_login):
+            return False
+        if baseline_sig is not None and response_sig == baseline_sig:
+            return False
+        return True
