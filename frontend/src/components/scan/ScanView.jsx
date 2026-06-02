@@ -38,7 +38,7 @@ export default function ScanView({
   const optionBase =
     "w-full rounded-xl border border-wavs-border bg-wavs-soft p-4 text-left transition hover:border-wavs-accent/40 hover:bg-[#eef7f0] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-wavs-soft";
   const optionActive =
-    "border-wavs-accent bg-[#e8f4ed] ring-2 ring-wavs-accent/25 shadow-[0_12px_28px_rgba(20,108,67,0.14)]";
+    "border-wavs-accent bg-[#e8f4ed] ring-2 ring-wavs-accent/40 shadow-[0_12px_28px_rgba(20,108,67,0.14)]";
 
   return (
     <div className="space-y-6">
@@ -51,7 +51,7 @@ export default function ScanView({
         </div>
 
         <label className={field}>
-          <span className={fieldLabel}>Target URL</span>
+          <span className={fieldLabel}>Enter full URL (must start with http:// or https://)</span>
           <input
             className={input}
             type="text"

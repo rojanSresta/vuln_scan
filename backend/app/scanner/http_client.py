@@ -18,13 +18,23 @@ class HttpClient:
             }
         )
 
-    def get(self, url: str, params: Optional[Dict[str, str]] = None) -> requests.Response:
+    def get(
+        self,
+        url: str,
+        params: Optional[Dict[str, str]] = None,
+        allow_redirects: bool = True,
+    ) -> requests.Response:
         self._check_cancelled()
-        return self.session.get(url, params=params, timeout=12, allow_redirects=True)
+        return self.session.get(url, params=params, timeout=12, allow_redirects=allow_redirects)
 
-    def post(self, url: str, data: Dict[str, str]) -> requests.Response:
+    def post(
+        self,
+        url: str,
+        data: Dict[str, str],
+        allow_redirects: bool = True,
+    ) -> requests.Response:
         self._check_cancelled()
-        return self.session.post(url, data=data, timeout=12, allow_redirects=True)
+        return self.session.post(url, data=data, timeout=12, allow_redirects=allow_redirects)
 
     def _check_cancelled(self) -> None:
         if self.cancel_callback:

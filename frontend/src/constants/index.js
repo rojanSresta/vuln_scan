@@ -3,8 +3,8 @@ export const TOKEN_KEY = process.env.REACT_APP_TOKEN_KEY || "wavs_token";
 export const ADMIN_TOKEN_KEY = process.env.REACT_APP_ADMIN_TOKEN_KEY || "wavs_admin_token";
 
 export const VULN_OPTIONS = [
-  { id: "sql_injection", label: "SQL Injection", desc: "Detect query manipulation attempts" },
-  { id: "xss", label: "Cross-Site Scripting", desc: "Find reflected script injection points" },
+  { id: "sql_injection", label: "SQL Injection", desc: "Try SQLi payloads against login forms" },
+  { id: "xss", label: "Cross-Site Scripting", desc: "Confirm reflected payloads with browser alerts" },
   { id: "dir_traversal", label: "Directory Traversal", desc: "Probe unsafe file path access" },
   { id: "missing_headers", label: "Missing Header", desc: "Check for absent security response headers" },
   { id: "default_credentials", label: "Default Credentials", desc: "Try common username and password pairs on login forms" },
