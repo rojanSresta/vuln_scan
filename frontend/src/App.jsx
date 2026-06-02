@@ -90,7 +90,7 @@ export default function App() {
       <Topbar user={auth.user} view={scanner.view} onViewChange={scanner.setView} onLogout={handleLogout} />
 
       <main className={page}>
-        {scanner.errorMsg && <div className={alertError}>Action failed: {scanner.errorMsg}</div>}
+        {scanner.errorMsg && <div className={alertError}>{scanner.errorMsg}</div>}
 
         {scanner.view === "scan" && (
           <ScanView
