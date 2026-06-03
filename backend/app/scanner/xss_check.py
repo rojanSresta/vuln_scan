@@ -14,6 +14,8 @@ from playwright.sync_api import Error as PlaywrightError
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 from playwright.sync_api import sync_playwright
 
+from app.scanner.playwright_browser import launch_chromium
+
 logger = logging.getLogger(__name__)
 
 DIALOG_WAIT_MS = 1200
@@ -30,15 +32,21 @@ class XssCheck(VulnerabilityCheck):
     def scan(self, context: CrawlContext) -> list[VulnerabilityFinding]:
         try:
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch(headless=True)
+                browser = launch_chromium(playwright)
                 try:
                     page = browser.new_page()
                     finding_url = self._scan_query_alerts(page, context.pages) or self._scan_form_alerts(page, context.pages)
                 finally:
                     browser.close()
         except PlaywrightError as exc:
-            logger.warning("Skipping XSS browser confirmation because Playwright failed: %s", exc)
-            return []
+            message = (
+                "XSS browser confirmation failed: "
+                f"{exc}. Deploy the backend on Render using Docker "
+                "(backend/Dockerfile, dockerContext=backend) — native Python "
+                "runtime cannot run Chromium."
+            )
+            logger.warning("XSS browser confirmation failed: %s", exc)
+            raise RuntimeError(message) from exc
 
         if finding_url:
             return [self._make_finding(finding_url)]

@@ -1,0 +1,30 @@
+# Render Blueprint — XSS checks require Docker + Playwright/Chromium.
+# In the Render dashboard you can also configure this manually:
+#   Environment: Docker
+#   Dockerfile path: backend/Dockerfile
+#   Docker context: backend
+#   Build command / Start command: leave empty (use Dockerfile CMD)
+
+services:
+  - type: web
+    name: wavs-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /ms-playwright
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_FULL_NAME
+        sync: false

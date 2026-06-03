@@ -1,4 +1,20 @@
-export const API = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const DEFAULT_API = "http://localhost:8000";
+export const API = process.env.REACT_APP_API_URL || DEFAULT_API;
+
+// Warn loudly when the frontend was built without REACT_APP_API_URL.
+// In production this almost always means the Vercel env var is missing and
+// the browser will try to call http://localhost:8000 (which doesn't exist),
+// so every API request — including starting an XSS scan — silently fails.
+if (typeof window !== "undefined" && API === DEFAULT_API && !process.env.REACT_APP_API_URL) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[WAVS] REACT_APP_API_URL is not set. The frontend will call http://localhost:8000, " +
+      "which only works when the API runs on the same machine. On Vercel, set " +
+      "REACT_APP_API_URL to your deployed backend URL in Project Settings → Environment Variables " +
+      "and redeploy."
+  );
+}
+
 export const TOKEN_KEY = process.env.REACT_APP_TOKEN_KEY || "wavs_token";
 export const ADMIN_TOKEN_KEY = process.env.REACT_APP_ADMIN_TOKEN_KEY || "wavs_admin_token";
 

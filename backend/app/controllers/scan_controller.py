@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import os
+import threading
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy import select
 
@@ -25,17 +26,29 @@ class ScanController:
     def start(
         self,
         req: ScanRequest,
-        background_tasks: BackgroundTasks,
         current_user: User = Depends(get_current_user),
     ) -> dict[str, str]:
         result = self.scans.start(current_user.id, req.target_url, req.vulnerabilities)
         vulns = ["scan_all"] if "scan_all" in req.vulnerabilities else req.vulnerabilities
-        background_tasks.add_task(
-            self.scans.run_background,
-            result["scan_id"],
-            req.target_url,
-            vulns,
+
+        # Run the scan on a real OS thread, NOT on FastAPI's BackgroundTasks.
+        # Two reasons:
+        # 1. The XSS check uses sync_playwright, which is fully blocking. On
+        #    a single-worker uvicorn it would freeze the event loop for the
+        #    entire scan duration, hanging /health and /scan/status polling.
+        # 2. FastAPI BackgroundTasks is tied to the request lifecycle; on
+        #    some PaaS platforms (including Render) it can be cancelled when
+        #    the response is sent or the worker is recycled. A daemon
+        #    thread keeps running for the life of the worker process and is
+        #    not affected by request lifecycle.
+        scan_id = result["scan_id"]
+        thread = threading.Thread(
+            target=self.scans.run_background,
+            args=(scan_id, req.target_url, vulns),
+            name=f"wavs-scan-{scan_id[:8]}",
+            daemon=True,
         )
+        thread.start()
         return result
 
     def status(self, scan_id: str, current_user: User = Depends(get_current_user)) -> ScanStatus:

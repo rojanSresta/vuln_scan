@@ -5,7 +5,10 @@ pydantic>=2.10.0
 email-validator>=2.2.0
 requests>=2.32.0
 tldextract>=5.1.2
-playwright>=1.44.0
+# Must match the Playwright version baked into backend/Dockerfile
+# (mcr.microsoft.com/playwright/python:v1.50.0-noble). A newer pip package
+# with older bundled browsers causes Chromium launch failures in production.
+playwright==1.50.0
 reportlab>=4.2.0
 python-multipart>=0.0.12
 sqlalchemy>=2.0.36
