@@ -128,9 +128,28 @@ warning pointing at this variable.
 | `ADMIN_PASSWORD` | First-run admin password |
 | `ADMIN_FULL_NAME` | First-run admin display name |
 
-Set the **Docker** runtime on Render, with `Dockerfile` path
-`backend/Dockerfile` and the context directory set to `backend/` (or root if
-you adjust the Dockerfile paths).
+**Render must use Docker, not native Python.** If the service uses
+`pip install` + `uvicorn` without Docker, Playwright has no Chromium and every
+XSS scan fails with “browser confirmation skipped”. In Render → your web
+service → Settings:
+
+| Setting | Value |
+|---------|-------|
+| Environment | **Docker** |
+| Dockerfile Path | `backend/Dockerfile` |
+| Docker Context | `backend` |
+| Build Command | *(leave empty — Dockerfile runs the build)* |
+| Start Command | *(leave empty — Dockerfile `CMD`)* |
+
+Or connect the repo with the included `render.yaml` blueprint.
+
+On startup, logs should show `Chromium startup check passed`. If you see
+`Chromium startup check FAILED`, open Render **Logs** right after deploy — the
+line includes the real Playwright error (missing binary, wrong path, etc.).
+
+The Docker build runs `python -m playwright install chromium` and a build-step
+launch test; if that step fails in Render build logs, fix the image before
+redeploying the web service.
 
 ### Neon (database)
 

@@ -50,6 +50,17 @@ def create_app() -> FastAPI:
         browsers_path = os.getenv("PLAYWRIGHT_BROWSERS_PATH", "(playwright default)")
         logger.info("Playwright browser path: %s", browsers_path)
         init_db()
+        try:
+            from app.scanner.playwright_browser import verify_chromium_launch
+
+            verify_chromium_launch()
+            logger.info("Chromium startup check passed")
+        except Exception as exc:
+            logger.error(
+                "Chromium startup check FAILED — XSS scans will not work until this is "
+                "fixed. Use Render Docker runtime with backend/Dockerfile. Detail: %s",
+                exc,
+            )
 
     @app.get("/health")
     def health() -> dict[str, str]:
