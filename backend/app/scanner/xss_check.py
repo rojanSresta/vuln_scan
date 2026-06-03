@@ -19,6 +19,14 @@ logger = logging.getLogger(__name__)
 DIALOG_WAIT_MS = 1200
 PAGE_TIMEOUT_MS = 8000
 
+# Required when Chromium runs inside Docker/Render (often as root, small /dev/shm).
+CHROMIUM_LAUNCH_ARGS = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+]
+
 
 class XssCheck(VulnerabilityCheck):
     category = "xss"
@@ -30,15 +38,29 @@ class XssCheck(VulnerabilityCheck):
     def scan(self, context: CrawlContext) -> list[VulnerabilityFinding]:
         try:
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch(headless=True)
+                browser = playwright.chromium.launch(
+                    headless=True,
+                    args=CHROMIUM_LAUNCH_ARGS,
+                )
                 try:
                     page = browser.new_page()
                     finding_url = self._scan_query_alerts(page, context.pages) or self._scan_form_alerts(page, context.pages)
                 finally:
                     browser.close()
         except PlaywrightError as exc:
+            # Vercel serverless functions (and most PaaS runtimes) cannot launch
+            # Chromium — they have no system libraries and no Playwright browser
+            # binaries. If we silently returned [] here, XSS would appear to "run"
+            # in production but find nothing, which is misleading. Surface the
+            # reason via the scan progress message instead.
+            message = (
+                "XSS browser confirmation skipped: Playwright/Chromium is not available "
+                "in this environment. The XSS check requires a runtime with Playwright "
+                "and its system dependencies installed (run via the provided Docker setup, "
+                "or any host that has run `playwright install --with-deps chromium`)."
+            )
             logger.warning("Skipping XSS browser confirmation because Playwright failed: %s", exc)
-            return []
+            raise RuntimeError(message) from exc
 
         if finding_url:
             return [self._make_finding(finding_url)]
