@@ -100,6 +100,15 @@ Dockerfile now starts uvicorn with `--workers 1`.
 
 ### Vercel (frontend)
 
+Set **Root Directory** to `frontend` in Project Settings → General. The repo
+includes `frontend/vercel.json` with `npm ci` (no `--prefix frontend`). If Root
+Directory is `frontend` but the install command still uses
+`npm --prefix frontend ci`, npm looks for `frontend/frontend/package-lock.json`
+and the build fails.
+
+Alternatively leave Root Directory empty and use the root `vercel.json`, which
+runs `cd frontend && npm ci`.
+
 | Variable | Value |
 |----------|-------|
 | `REACT_APP_API_URL` | Your Render backend URL, e.g. `https://wavs-api.onrender.com` (no trailing slash) |
