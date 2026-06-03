@@ -33,7 +33,18 @@ APP_TITLE = "VulnScan API"
 APP_DESCRIPTION = "Manual web vulnerability scanner backend"
 APP_VERSION = "2.0.0"
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+def _normalize_database_url(url: str | None) -> str | None:
+    """Neon and other hosts often provide postgres:// URLs; SQLAlchemy needs psycopg."""
+    if not url:
+        return None
+    if url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+psycopg://", 1)
+    if url.startswith("postgresql://") and "+psycopg" not in url:
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
+    return url
+
+
+DATABASE_URL = _normalize_database_url(os.getenv("DATABASE_URL"))
 
 _cors_raw = os.getenv("CORS_ORIGINS", "").strip()
 if _cors_raw == "*":
